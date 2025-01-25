@@ -90,7 +90,56 @@ public class ChessPiece {
     }
 
     private Collection<ChessMove> orthogonalMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+        ArrayList<ChessMove> moves = new ArrayList<>();
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+
+        // Right
+        for (int i = 1; i <= 8 - col; i++) {
+            ChessPosition newPosition = new ChessPosition(row, col + i);
+            if (this.isBlocked(board, newPosition)) {
+                break;
+            }
+            moves.add(new ChessMove(myPosition, newPosition, null));
+            if (this.canCapture(board, newPosition)) {
+                break;
+            }
+        }
+        // Left
+        for (int i = 1; i <= col - 1; i++) {
+            ChessPosition newPosition = new ChessPosition(row, col - i);
+            if (this.isBlocked(board, newPosition)) {
+                break;
+            }
+            moves.add(new ChessMove(myPosition, newPosition, null));
+            if (this.canCapture(board, newPosition)) {
+                break;
+            }
+        }
+        // Up
+        for (int i = 1; i <= 8 - row; i++) {
+            ChessPosition newPosition = new ChessPosition(row + i, col);
+            if (this.isBlocked(board, newPosition)) {
+                break;
+            }
+            moves.add(new ChessMove(myPosition, newPosition, null));
+            if (this.canCapture(board, newPosition)) {
+                break;
+            }
+        }
+        // Down
+        for (int i = 1; i <= row - 1; i++) {
+            ChessPosition newPosition = new ChessPosition(row - i, col);
+            if (this.isBlocked(board, newPosition)) {
+                break;
+            }
+            moves.add(new ChessMove(myPosition, newPosition, null));
+            if (this.canCapture(board, newPosition)) {
+                break;
+            }
+        }
+
+        return moves;
     }
 
     // TODO: repeat code less
