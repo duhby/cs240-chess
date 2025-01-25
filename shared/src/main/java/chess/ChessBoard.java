@@ -40,7 +40,31 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        throw new RuntimeException("Not implemented");
+        int[] baseRows = {1, 8};
+        int[] pawnRows = {2, 7};
+        ChessPiece.PieceType[] order = {
+                ChessPiece.PieceType.ROOK,
+                ChessPiece.PieceType.KNIGHT,
+                ChessPiece.PieceType.BISHOP,
+                ChessPiece.PieceType.QUEEN,
+                ChessPiece.PieceType.KING,
+                ChessPiece.PieceType.BISHOP,
+                ChessPiece.PieceType.KNIGHT,
+                ChessPiece.PieceType.ROOK,
+        };
+
+        for (int row : baseRows) {
+            ChessGame.TeamColor color = row == 1 ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
+            for (int i = 0; i < 8; i++) {
+                this.addPiece(new ChessPosition(row, i + 1), new ChessPiece(color, order[i]));
+            }
+        }
+        for (int row : pawnRows) {
+            ChessGame.TeamColor color = row == 2 ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
+            for (int i = 0; i < 8; i++) {
+                this.addPiece(new ChessPosition(row, i + 1), new ChessPiece(color, ChessPiece.PieceType.PAWN));
+            }
+        }
     }
 
     @Override
