@@ -46,7 +46,19 @@ public class ChessMove {
 
     @Override
     public String toString() {
-        return this.endPosition.toString();
+        ChessPiece.PieceType promotionPiece = this.getPromotionPiece();
+        String promotionDisplay = "";
+        if (promotionPiece != null) {
+            promotionDisplay = switch(this.getPromotionPiece()) {
+                case QUEEN -> "=Q";
+                case BISHOP -> "=B";
+                case KNIGHT -> "=N";
+                case ROOK -> "=R";
+                // Pawn/King (shouldn't be possible)
+                default -> "";
+            };
+        }
+        return this.getEndPosition().toString() + promotionDisplay;
     }
 
     @Override
