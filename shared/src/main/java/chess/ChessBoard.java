@@ -10,11 +10,9 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessBoard {
-    private ChessPosition[][] position;
+    private final ChessPiece[][] position = new ChessPiece[8][8];
 
-    public ChessBoard() {
-        this.resetBoard();
-    }
+    public ChessBoard() {}
 
     /**
      * Adds a chess piece to the chessboard
@@ -23,7 +21,7 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        throw new RuntimeException("Not implemented");
+        this.position[position.getRow()][position.getColumn()] = piece;
     }
 
     /**
@@ -34,7 +32,7 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        throw new RuntimeException("Not implemented");
+        return this.position[position.getRow()][position.getColumn()];
     }
 
     /**
