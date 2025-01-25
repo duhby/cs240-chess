@@ -95,7 +95,7 @@ public class ChessPiece {
                     continue;
                 }
                 moves.add(new ChessMove(myPosition, newPosition, null));
-            } catch (RuntimeException _) {}
+            } catch (RuntimeException e) {}
         }
 
         return moves;
@@ -137,7 +137,7 @@ public class ChessPiece {
             ChessPosition newPosition;
             try {
                 newPosition = new ChessPosition(newRow, newCol);
-            } catch (RuntimeException _) {
+            } catch (RuntimeException e) {
                 continue;
             }
             // Straight
