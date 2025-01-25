@@ -13,6 +13,9 @@ public class ChessPosition {
     private final int col;
 
     public ChessPosition(int row, int col) {
+        if (row > 8 || row < 1 || col > 8 || col < 1) {
+            throw new RuntimeException("Invalid position.");
+        }
         this.row = row;
         this.col = col;
     }
@@ -31,6 +34,12 @@ public class ChessPosition {
      */
     public int getColumn() {
         return this.col;
+    }
+
+    @Override
+    public String toString() {
+        char col = (char)('a' + this.getColumn() - 1);
+        return String.format("%c%d", col, this.getRow());
     }
 
     @Override
