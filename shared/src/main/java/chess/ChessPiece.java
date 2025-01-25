@@ -80,15 +80,97 @@ public class ChessPiece {
     }
 
     private Collection<ChessMove> knightMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+        ArrayList<ChessMove> moves = new ArrayList<>();
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+
+        int[][] diffs = {{1, 2}, {2, 1}, {-1, 2}, {-2, 1}, {1, -2}, {2, -1}, {-1, -2}, {-2, -1}};
+
+        for (int[] diff : diffs) {
+            int newRow = row + diff[0];
+            int newCol = col + diff[1];
+            try {
+                ChessPosition newPosition = new ChessPosition(newRow, newCol);
+                if (this.isBlocked(board, newPosition)) {
+                    continue;
+                }
+                moves.add(new ChessMove(myPosition, newPosition, null));
+            } catch (RuntimeException _) {}
+        }
+
+        return moves;
     }
 
     private Collection<ChessMove> rookMoves(ChessBoard board, ChessPosition myPosition) {
         return this.orthogonalMoves(board, myPosition, 0);
     }
 
+    // TODO: en passant?
     private Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+        ArrayList<ChessMove> moves = new ArrayList<>();
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+
+        int baseRow = 0;
+        int lastRow = 0;
+        int dir = 0;
+        switch (this.getTeamColor()) {
+            case ChessGame.TeamColor.WHITE:
+                baseRow = 2;
+                lastRow = 7;
+                dir = 1;
+                break;
+            case ChessGame.TeamColor.BLACK:
+                baseRow = 7;
+                lastRow = 2;
+                dir = -1;
+                break;
+        }
+
+        int[][] diffs = {{dir, -1}, {dir, 0}, {dir, 1}};
+
+        ArrayList<ChessPosition> positions = new ArrayList<>();
+        for (int[] diff : diffs) {
+            int newRow = row + diff[0];
+            int newCol = col + diff[1];
+            // Pawn promotion is mandatory (a pawn can't be on the back rank)
+            ChessPosition newPosition;
+            try {
+                newPosition = new ChessPosition(newRow, newCol);
+            } catch (RuntimeException _) {
+                continue;
+            }
+            // Straight
+            if (diff[1] == 0) {
+                // isBlocked handles pawns correctly
+                if (this.isBlocked(board, newPosition)) {
+                    continue;
+                }
+                positions.add(newPosition);
+                if (row == baseRow) {
+                    newPosition = new ChessPosition(row + (2 * dir), col);
+                    if (!this.isBlocked(board, newPosition)) {
+                        positions.add(newPosition);
+                    }
+                }
+            // Capture
+            } else if (this.canCapture(board, newPosition)) {
+                positions.add(newPosition);
+            }
+        }
+
+        for (ChessPosition position : positions) {
+            if (row == lastRow) {
+                moves.add(new ChessMove(myPosition, position, PieceType.QUEEN));
+                moves.add(new ChessMove(myPosition, position, PieceType.BISHOP));
+                moves.add(new ChessMove(myPosition, position, PieceType.KNIGHT));
+                moves.add(new ChessMove(myPosition, position, PieceType.ROOK));
+            } else {
+                moves.add(new ChessMove(myPosition, position, null));
+            }
+        }
+
+        return moves;
     }
 
     // When limit is 0 it's considered as no limit
@@ -231,6 +313,9 @@ public class ChessPiece {
         ChessPiece other = board.getPiece(newPosition);
         if (other == null) {
             return false;
+        }
+        if (this.getPieceType() == PieceType.PAWN) {
+            return true;
         }
         return other.getTeamColor() == this.getTeamColor();
     }
