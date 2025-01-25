@@ -105,7 +105,6 @@ public class ChessPiece {
         return this.orthogonalMoves(board, myPosition, 0);
     }
 
-    // TODO: en passant?
     private Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition myPosition) {
         ArrayList<ChessMove> moves = new ArrayList<>();
         int row = myPosition.getRow();
@@ -240,7 +239,6 @@ public class ChessPiece {
         return moves;
     }
 
-    // TODO: repeat code less
     // When limit is 0 it's considered as no limit
     // Limit is limit per direction
     private Collection<ChessMove> diagonalMoves(ChessBoard board, ChessPosition myPosition, int limit) {
