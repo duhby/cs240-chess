@@ -10,7 +10,7 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessBoard {
-    private final ChessPiece[][] position = new ChessPiece[8][8];
+    private ChessPiece[][] position = new ChessPiece[8][8];
 
     public ChessBoard() {}
 
@@ -40,6 +40,8 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
+        this.position = new ChessPiece[8][8];
+
         int[] baseRows = {1, 8};
         int[] pawnRows = {2, 7};
         ChessPiece.PieceType[] order = {
