@@ -64,17 +64,19 @@ public class ChessPiece {
     }
 
     private Collection<ChessMove> kingMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+        Collection<ChessMove> moves = this.orthogonalMoves(board, myPosition, 1);
+        moves.addAll(this.diagonalMoves(board, myPosition, 1));
+        return moves;
     }
 
     private Collection<ChessMove> queenMoves(ChessBoard board, ChessPosition myPosition) {
-        Collection<ChessMove> moves = this.orthogonalMoves(board, myPosition);
-        moves.addAll(this.diagonalMoves(board, myPosition));
+        Collection<ChessMove> moves = this.orthogonalMoves(board, myPosition, 0);
+        moves.addAll(this.diagonalMoves(board, myPosition, 0));
         return moves;
     }
 
     private Collection<ChessMove> bishopMoves(ChessBoard board, ChessPosition myPosition) {
-        return this.diagonalMoves(board, myPosition);
+        return this.diagonalMoves(board, myPosition, 0);
     }
 
     private Collection<ChessMove> knightMoves(ChessBoard board, ChessPosition myPosition) {
@@ -82,14 +84,16 @@ public class ChessPiece {
     }
 
     private Collection<ChessMove> rookMoves(ChessBoard board, ChessPosition myPosition) {
-        return this.orthogonalMoves(board, myPosition);
+        return this.orthogonalMoves(board, myPosition, 0);
     }
 
     private Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition myPosition) {
         throw new RuntimeException("Not implemented");
     }
 
-    private Collection<ChessMove> orthogonalMoves(ChessBoard board, ChessPosition myPosition) {
+    // When limit is 0 it's considered as no limit
+    // Limit is limit per direction.
+    private Collection<ChessMove> orthogonalMoves(ChessBoard board, ChessPosition myPosition, int limit) {
         ArrayList<ChessMove> moves = new ArrayList<>();
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
@@ -104,6 +108,9 @@ public class ChessPiece {
             if (this.canCapture(board, newPosition)) {
                 break;
             }
+            if (i == limit) {
+                break;
+            }
         }
         // Left
         for (int i = 1; i <= col - 1; i++) {
@@ -113,6 +120,9 @@ public class ChessPiece {
             }
             moves.add(new ChessMove(myPosition, newPosition, null));
             if (this.canCapture(board, newPosition)) {
+                break;
+            }
+            if (i == limit) {
                 break;
             }
         }
@@ -126,6 +136,9 @@ public class ChessPiece {
             if (this.canCapture(board, newPosition)) {
                 break;
             }
+            if (i == limit) {
+                break;
+            }
         }
         // Down
         for (int i = 1; i <= row - 1; i++) {
@@ -137,13 +150,18 @@ public class ChessPiece {
             if (this.canCapture(board, newPosition)) {
                 break;
             }
+            if (i == limit) {
+                break;
+            }
         }
 
         return moves;
     }
 
     // TODO: repeat code less
-    private Collection<ChessMove> diagonalMoves(ChessBoard board, ChessPosition myPosition) {
+    // When limit is 0 it's considered as no limit
+    // Limit is limit per direction
+    private Collection<ChessMove> diagonalMoves(ChessBoard board, ChessPosition myPosition, int limit) {
         ArrayList<ChessMove> moves = new ArrayList<>();
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
@@ -158,6 +176,9 @@ public class ChessPiece {
             if (this.canCapture(board, newPosition)) {
                 break;
             }
+            if (i == limit) {
+                break;
+            }
         }
         // Bottom right
         for (int i = 1; i <= Math.min(row - 1, 8 - col); i++) {
@@ -167,6 +188,9 @@ public class ChessPiece {
             }
             moves.add(new ChessMove(myPosition, newPosition, null));
             if (this.canCapture(board, newPosition)) {
+                break;
+            }
+            if (i == limit) {
                 break;
             }
         }
@@ -180,6 +204,9 @@ public class ChessPiece {
             if (this.canCapture(board, newPosition)) {
                 break;
             }
+            if (i == limit) {
+                break;
+            }
         }
         // Bottom left
         for (int i = 1; i <= Math.min(row - 1, col - 1); i++) {
@@ -191,11 +218,15 @@ public class ChessPiece {
             if (this.canCapture(board, newPosition)) {
                 break;
             }
+            if (i == limit) {
+                break;
+            }
         }
 
         return moves;
     }
 
+    // Only considers being blocked by other pieces
     private boolean isBlocked(ChessBoard board, ChessPosition newPosition) {
         ChessPiece other = board.getPiece(newPosition);
         if (other == null) {
