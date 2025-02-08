@@ -98,6 +98,18 @@ public class ChessBoard {
         }
     }
 
+    public ChessBoard copy() {
+        ChessBoard newBoard = new ChessBoard();
+        ChessPosition currentPosition;
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                currentPosition = new ChessPosition(i, j);
+                newBoard.addPiece(currentPosition, this.getPiece(currentPosition));
+            }
+        }
+        return newBoard;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
