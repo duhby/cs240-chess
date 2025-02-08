@@ -35,6 +35,32 @@ public class ChessBoard {
         return this.position[position.getRow() - 1][position.getColumn() - 1];
     }
 
+    public void makeMove(ChessMove move) {
+        ChessPosition startPosition = move.getStartPosition();
+        ChessPiece piece = this.getPiece(startPosition);
+        this.position[startPosition.getRow() - 1][startPosition.getColumn() - 1] = null;
+        ChessPiece.PieceType promotionPiece = move.getPromotionPiece();
+        if (promotionPiece != null) {
+            piece = new ChessPiece(piece.getTeamColor(), promotionPiece);
+        }
+        this.addPiece(move.getEndPosition(), piece);
+    }
+
+    public ChessPosition findPiece(ChessPiece.PieceType type, ChessGame.TeamColor color) {
+        ChessPosition currentPosition;
+        ChessPiece currentPiece;
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                currentPosition = new ChessPosition(i, j);
+                currentPiece = this.getPiece(currentPosition);
+                if (type == currentPiece.getPieceType() && color == currentPiece.getTeamColor()) {
+                    return currentPosition;
+                }
+            }
+        }
+        return null;
+    }
+
     /**
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
