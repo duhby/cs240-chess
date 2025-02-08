@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -52,7 +53,26 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece piece = this.board.getPiece(startPosition);
-        return piece.pieceMoves(this.board, startPosition);
+        ArrayList<ChessMove> validMoves = new ArrayList<>();
+        if (piece == null) {
+            return validMoves;
+        }
+        if (piece.getTeamColor() != this.turn) {
+            return validMoves;
+        }
+
+        for (ChessMove move : piece.pieceMoves(this.board, startPosition)) {
+            ChessBoard originalBoard = this.board.copy();
+            this.board.makeMove(move);
+            if (this.isInCheck(piece.getTeamColor())) {
+                this.board = originalBoard;
+                continue;
+            }
+            this.board = originalBoard;
+            validMoves.add(move);
+        }
+
+        return validMoves;
     }
 
     /**
@@ -62,7 +82,6 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        // TODO: test if king will be in check
         if (!this.validMoves(move.getStartPosition()).contains(move)) {
             throw new InvalidMoveException();
         }
@@ -77,8 +96,33 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        ChessPosition king = this.board.findPiece(ChessPiece.PieceType.KING, teamColor);
-        throw new RuntimeException("not implemented");
+        ChessPosition kingPosition = this.board.findPiece(ChessPiece.PieceType.KING, teamColor);
+        if (kingPosition == null) {
+            throw new RuntimeException("King not found.");
+        }
+
+        // Test all opponent pieces
+        ChessPosition currentPosition;
+        ChessPiece currentPiece;
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                currentPosition = new ChessPosition(i, j);
+                currentPiece = this.board.getPiece(currentPosition);
+                if (currentPiece == null) {
+                    continue;
+                }
+                if (currentPiece.getTeamColor() == teamColor) {
+                    continue;
+                }
+                for (ChessMove move : this.board.getPiece(currentPosition).pieceMoves(this.board, currentPosition)) {
+                    if (move.getEndPosition().equals(kingPosition)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
