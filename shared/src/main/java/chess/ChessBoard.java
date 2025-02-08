@@ -53,6 +53,9 @@ public class ChessBoard {
             for (int j = 1; j <= 8; j++) {
                 currentPosition = new ChessPosition(i, j);
                 currentPiece = this.getPiece(currentPosition);
+                if (currentPiece == null) {
+                    continue;
+                }
                 if (type == currentPiece.getPieceType() && color == currentPiece.getTeamColor()) {
                     return currentPosition;
                 }
