@@ -57,9 +57,6 @@ public class ChessGame {
         if (piece == null) {
             return validMoves;
         }
-        if (piece.getTeamColor() != this.turn) {
-            return validMoves;
-        }
 
         for (ChessMove move : piece.pieceMoves(this.board, startPosition)) {
             ChessBoard originalBoard = this.board.copy();
@@ -82,6 +79,13 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        ChessPiece piece = this.board.getPiece(move.getStartPosition());
+        if (piece == null) {
+            throw new InvalidMoveException();
+        }
+        if (piece.getTeamColor() != this.turn) {
+            throw new InvalidMoveException();
+        }
         if (!this.validMoves(move.getStartPosition()).contains(move)) {
             throw new InvalidMoveException();
         }
