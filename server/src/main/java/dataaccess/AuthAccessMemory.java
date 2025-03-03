@@ -12,6 +12,7 @@ public class AuthAccessMemory implements AuthAccess {
         rows.put(data.authToken(), data);
         return data;
     }
+
     public AuthData get(String authToken) throws DataAccessException {
         AuthData data = rows.get(authToken);
         if (data == null) {
@@ -19,12 +20,14 @@ public class AuthAccessMemory implements AuthAccess {
         }
         return data;
     }
+
     public void delete(String authToken) throws DataAccessException {
         AuthData data = rows.remove(authToken);
         if (data == null) {
             throw new DataAccessException("Not found");
         }
     }
+
     public void deleteAll() {
         rows = new HashMap<>();
     }
