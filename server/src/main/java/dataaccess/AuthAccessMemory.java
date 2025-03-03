@@ -28,8 +28,4 @@ public class AuthAccessMemory implements AuthAccess {
     public void deleteAll() {
         rows = new HashMap<>();
     }
-
-    public static String generateToken() {
-        return UUID.randomUUID().toString();
-    }
 }
