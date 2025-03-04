@@ -24,9 +24,6 @@ public class GameAccessMemory implements GameAccess {
     }
 
     public Collection<GameData> getAll() throws ResponseException {
-        if (rows.isEmpty()) {
-            throw ResponseException.badRequest();
-        }
         return rows.values();
     }
 
