@@ -35,8 +35,18 @@ public class GameAccessMemory implements GameAccess {
         String whiteUsername = data.whiteUsername();
         String blackUsername = data.blackUsername();
         switch (color) {
-            case "WHITE" -> whiteUsername = username;
-            case "BLACK" -> blackUsername = username;
+            case "WHITE" -> {
+                if (whiteUsername != null) {
+                    throw ResponseException.alreadyTaken();
+                }
+                whiteUsername = username;
+            }
+            case "BLACK" -> {
+                if (blackUsername != null) {
+                    throw ResponseException.alreadyTaken();
+                }
+                blackUsername = username;
+            }
             default -> throw ResponseException.badRequest();
         }
         GameData newData = new GameData(data.gameID(), whiteUsername, blackUsername, data.gameName(), data.game());
