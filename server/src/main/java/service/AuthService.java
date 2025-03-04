@@ -14,9 +14,10 @@ import java.util.UUID;
 public class AuthService {
     private final AuthAccess authAccess;
     private final UserAccess userAccess;
-    public AuthService() {
-        authAccess = new AuthAccessMemory();
-        userAccess = new UserAccessMemory();
+
+    public AuthService(AuthAccess authAccess, UserAccess userAccess) {
+        this.authAccess = authAccess;
+        this.userAccess = userAccess;
     }
 
     public LoginResult login(LoginRequest data) throws DataAccess, Unauthorized {
