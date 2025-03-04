@@ -7,6 +7,9 @@ import model.AuthData;
 import model.GameData;
 import record.CreateGameRequest;
 import record.CreateGameResponse;
+import record.ListGamesResponse;
+
+import java.util.Collection;
 
 public class GameService {
     private int nextID = 1;
@@ -25,6 +28,12 @@ public class GameService {
         }
         GameData game = gameAccess.create(new GameData(this.getNextID(), null, null, data.gameName(), new ChessGame()));
         return new CreateGameResponse(game.gameID());
+    }
+
+    public ListGamesResponse listGames(String authToken) throws ResponseException {
+        authAccess.get(authToken);
+        Collection<GameData> games = gameAccess.getAll();
+        return new ListGamesResponse(games);
     }
 
     private int getNextID() {
