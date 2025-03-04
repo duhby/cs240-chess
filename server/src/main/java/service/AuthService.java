@@ -20,7 +20,12 @@ public class AuthService {
     }
 
     public LoginResult login(LoginRequest data) throws ResponseException {
-        UserData user = userAccess.get(data.username());
+        UserData user;
+        try {
+            user = userAccess.get(data.username());
+        } catch (ResponseException e) {
+            throw ResponseException.unauthorized();
+        }
         if (!Objects.equals(user.password(), data.password())) {
             throw ResponseException.unauthorized();
         }
