@@ -2,7 +2,7 @@ package dataaccess;
 
 import java.util.HashMap;
 
-import exception.DataAccess;
+import exception.ResponseException;
 import model.UserData;
 
 public class UserAccessMemory implements UserAccess {
@@ -13,10 +13,10 @@ public class UserAccessMemory implements UserAccess {
         return data;
     }
 
-    public UserData get(String username) throws DataAccess {
+    public UserData get(String username) throws ResponseException {
         UserData data = rows.get(username);
         if (data == null) {
-            throw new DataAccess("Not found");
+            throw ResponseException.badRequest();
         }
         return data;
     }

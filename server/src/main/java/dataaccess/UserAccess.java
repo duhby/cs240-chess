@@ -1,10 +1,10 @@
 package dataaccess;
 
-import exception.DataAccess;
+import exception.ResponseException;
 import model.UserData;
 
 public interface UserAccess {
-    UserData create(UserData data) throws DataAccess;
-    UserData get(String username) throws DataAccess;
-    void deleteAll() throws DataAccess;
+    UserData create(UserData data) throws ResponseException;
+    UserData get(String username) throws ResponseException;
+    void deleteAll() throws ResponseException;
 }

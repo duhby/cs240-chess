@@ -1,8 +1,7 @@
 package service;
 
 import dataaccess.*;
-import exception.DataAccess;
-import exception.Unauthorized;
+import exception.ResponseException;
 import model.AuthData;
 import model.UserData;
 import record.LoginRequest;
@@ -20,10 +19,10 @@ public class AuthService {
         this.userAccess = userAccess;
     }
 
-    public LoginResult login(LoginRequest data) throws DataAccess, Unauthorized {
+    public LoginResult login(LoginRequest data) throws ResponseException {
         UserData user = userAccess.get(data.username());
         if (!Objects.equals(user.password(), data.password())) {
-            throw new Unauthorized();
+            throw ResponseException.unauthorized();
         }
         AuthData auth = authAccess.create(new AuthData(UUID.randomUUID().toString(), user.username()));
         return new LoginResult(user.username(), auth.authToken());
