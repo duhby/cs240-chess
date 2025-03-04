@@ -1,6 +1,5 @@
 package dataaccess;
 
-import chess.ChessGame;
 import exception.ResponseException;
 import model.GameData;
 
@@ -23,11 +22,11 @@ public class GameAccessMemory implements GameAccess {
         return data;
     }
 
-    public Collection<GameData> getAll() throws ResponseException {
+    public Collection<GameData> getAll() {
         return rows.values();
     }
 
-    public GameData addPlayer(int gameID, String color, String username) throws ResponseException {
+    public void addPlayer(int gameID, String color, String username) throws ResponseException {
         GameData data = this.get(gameID);
         String whiteUsername = data.whiteUsername();
         String blackUsername = data.blackUsername();
@@ -47,22 +46,7 @@ public class GameAccessMemory implements GameAccess {
             default -> throw ResponseException.badRequest();
         }
         GameData newData = new GameData(data.gameID(), whiteUsername, blackUsername, data.gameName(), data.game());
-        newData = rows.replace(gameID, newData);
-        return newData;
-    }
-
-    public GameData updatePosition(int gameID, ChessGame game) throws ResponseException {
-        GameData data = this.get(gameID);
-        GameData newData = new GameData(data.gameID(), data.whiteUsername(), data.blackUsername(), data.gameName(), game);
-        newData = rows.replace(gameID, newData);
-        return newData;
-    }
-
-    public void delete(int gameID) throws ResponseException {
-        GameData data = rows.remove(gameID);
-        if (data == null) {
-            throw ResponseException.badRequest();
-        }
+        rows.replace(gameID, newData);
     }
 
     public void deleteAll() {
