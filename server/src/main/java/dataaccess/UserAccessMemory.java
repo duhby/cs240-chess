@@ -8,7 +8,13 @@ import model.UserData;
 public class UserAccessMemory implements UserAccess {
     private HashMap<String, UserData> rows = new HashMap<>();
 
-    public UserData create(UserData data) {
+    public UserData create(UserData data) throws ResponseException {
+        for (UserData user : rows.values()) {
+            if (user.email().equals(data.email()) || user.username().equals(data.username())) {
+                throw ResponseException.alreadyTaken();
+            }
+        }
+
         rows.put(data.username(), data);
         return data;
     }

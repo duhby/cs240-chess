@@ -27,4 +27,8 @@ public class AuthService {
         AuthData auth = authAccess.create(new AuthData(UUID.randomUUID().toString(), user.username()));
         return new LoginResult(user.username(), auth.authToken());
     }
+
+    public void logout(String authToken) throws ResponseException {
+        authAccess.delete(authToken);
+    }
 }

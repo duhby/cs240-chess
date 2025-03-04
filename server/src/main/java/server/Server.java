@@ -6,6 +6,8 @@ import dataaccess.*;
 import exception.ResponseException;
 import record.LoginRequest;
 import record.LoginResult;
+import record.RegisterRequest;
+import record.RegisterResult;
 import service.AuthService;
 import service.DatabaseService;
 import service.GameService;
@@ -15,7 +17,7 @@ import spark.*;
 public class Server {
     private final AuthService authService;
 //    private final GameService gameService;
-//    private final UserService userService;
+    private final UserService userService;
     private final DatabaseService databaseService;
 
     public Server() {
@@ -25,7 +27,7 @@ public class Server {
 
         authService = new AuthService(authAccess, userAccess);
 //        gameService = new GameService();
-//        userService = new UserService();
+        userService = new UserService(authAccess, userAccess);
         databaseService = new DatabaseService(authAccess, gameAccess, userAccess);
     }
 
@@ -35,7 +37,9 @@ public class Server {
         Spark.staticFiles.location("web");
 
         Spark.delete("/db", this::deleteAll);
+        Spark.post("/user", this::register);
         Spark.post("/session", this::login);
+        Spark.delete("/session", this::logout);
         Spark.exception(ResponseException.class, this::exceptionHandler);
 
         Spark.awaitInitialization();
@@ -47,15 +51,35 @@ public class Server {
         return "{}";
     }
 
+    private Object register(Request req, Response res) throws ResponseException {
+        RegisterRequest registerRequest = serialize(req.body(), RegisterRequest.class);
+        RegisterResult registerResult = this.userService.register(registerRequest);
+        return new Gson().toJson(registerResult);
+    }
+
     private Object login(Request req, Response res) throws ResponseException {
-        LoginRequest loginRequest;
+        LoginRequest loginRequest = serialize(req.body(), LoginRequest.class);;
+        LoginResult loginResult = this.authService.login(loginRequest);
+        return new Gson().toJson(loginResult);
+    }
+
+    private Object logout(Request req, Response res) throws ResponseException {
+        String authToken = req.headers("authorization");
+        this.authService.logout(authToken);
+        return "{}";
+    }
+
+    // Generics moment
+    public static <T> T serialize(String body, Class<T> obj) throws ResponseException {
         try {
-            loginRequest = new Gson().fromJson(req.body(), LoginRequest.class);
+            T serialized = new Gson().fromJson(body, obj);
+            if (serialized == null) {
+                throw ResponseException.badRequest();
+            }
+            return serialized;
         } catch (JsonSyntaxException e) {
             throw ResponseException.badRequest();
         }
-        LoginResult loginResult = this.authService.login(loginRequest);
-        return new Gson().toJson(loginResult);
     }
 
     private void exceptionHandler(ResponseException ex, Request req, Response res) {
