@@ -17,7 +17,7 @@ public class ResponseException extends Exception {
     }
 
     public String toJson() {
-        return new Gson().toJson(Map.of("message", "Error: " + getMessage(), "status", statusCode));
+        return new Gson().toJson(Map.of("message", "Error: " + getMessage()));
     }
 
     public static ResponseException unauthorized() {
