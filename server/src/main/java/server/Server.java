@@ -7,21 +7,26 @@ import exception.ResponseException;
 import record.LoginRequest;
 import record.LoginResult;
 import service.AuthService;
+import service.DatabaseService;
+import service.GameService;
+import service.UserService;
 import spark.*;
 
 public class Server {
-    private final AuthAccess authAccess;
-    private final GameAccess gameAccess;
-    private final UserAccess userAccess;
     private final AuthService authService;
-    //    private final GameService gameService;
-    //    private final UserService userService;
+//    private final GameService gameService;
+//    private final UserService userService;
+    private final DatabaseService databaseService;
 
     public Server() {
-        authAccess = new AuthAccessMemory();
-        gameAccess = new GameAccessMemory();
-        userAccess = new UserAccessMemory();
+        AuthAccess authAccess = new AuthAccessMemory();
+        GameAccess gameAccess = new GameAccessMemory();
+        UserAccess userAccess = new UserAccessMemory();
+
         authService = new AuthService(authAccess, userAccess);
+//        gameService = new GameService();
+//        userService = new UserService();
+        databaseService = new DatabaseService(authAccess, gameAccess, userAccess);
     }
 
     public int run(int desiredPort) {
@@ -29,11 +34,17 @@ public class Server {
 
         Spark.staticFiles.location("web");
 
+        Spark.delete("/db", this::deleteAll);
         Spark.post("/session", this::login);
         Spark.exception(ResponseException.class, this::exceptionHandler);
 
         Spark.awaitInitialization();
         return Spark.port();
+    }
+
+    private Object deleteAll(Request req, Response res) throws ResponseException {
+        databaseService.clear();
+        return "{}";
     }
 
     private Object login(Request req, Response res) throws ResponseException {
