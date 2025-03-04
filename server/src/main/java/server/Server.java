@@ -4,10 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import dataaccess.*;
 import exception.ResponseException;
-import record.LoginRequest;
-import record.LoginResult;
-import record.RegisterRequest;
-import record.RegisterResult;
+import record.*;
 import service.AuthService;
 import service.DatabaseService;
 import service.GameService;
@@ -16,7 +13,7 @@ import spark.*;
 
 public class Server {
     private final AuthService authService;
-//    private final GameService gameService;
+    private final GameService gameService;
     private final UserService userService;
     private final DatabaseService databaseService;
 
@@ -26,7 +23,7 @@ public class Server {
         UserAccess userAccess = new UserAccessMemory();
 
         authService = new AuthService(authAccess, userAccess);
-//        gameService = new GameService();
+        gameService = new GameService(authAccess, gameAccess);
         userService = new UserService(authAccess, userAccess);
         databaseService = new DatabaseService(authAccess, gameAccess, userAccess);
     }
@@ -40,6 +37,7 @@ public class Server {
         Spark.post("/user", this::register);
         Spark.post("/session", this::login);
         Spark.delete("/session", this::logout);
+        Spark.post("/game", this::createGame);
         Spark.exception(ResponseException.class, this::exceptionHandler);
 
         Spark.awaitInitialization();
@@ -61,7 +59,7 @@ public class Server {
     }
 
     private Object login(Request req, Response res) throws ResponseException {
-        LoginRequest loginRequest = serialize(req.body(), LoginRequest.class);;
+        LoginRequest loginRequest = serialize(req.body(), LoginRequest.class);
         LoginResult loginResult = this.authService.login(loginRequest);
         return new Gson().toJson(loginResult);
     }
@@ -70,6 +68,13 @@ public class Server {
         String authToken = req.headers("authorization");
         this.authService.logout(authToken);
         return "{}";
+    }
+
+    private Object createGame(Request req, Response res) throws ResponseException {
+        String authToken = req.headers("authorization");
+        CreateGameRequest createGameRequest = serialize(req.body(), CreateGameRequest.class);
+        CreateGameResponse createGameResponse = this.gameService.create(createGameRequest, authToken);
+        return new Gson().toJson(createGameResponse);
     }
 
     // Generics moment
