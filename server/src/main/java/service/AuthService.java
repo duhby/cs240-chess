@@ -1,7 +1,7 @@
 package service;
 
 import dataaccess.*;
-import exception.DataAccessException;
+import exception.DataAccess;
 import exception.Unauthorized;
 import model.AuthData;
 import model.UserData;
@@ -19,7 +19,7 @@ public class AuthService {
         userAccess = new UserAccessMemory();
     }
 
-    public LoginResult login(LoginRequest data) throws DataAccessException, Unauthorized {
+    public LoginResult login(LoginRequest data) throws DataAccess, Unauthorized {
         UserData user = userAccess.get(data.username());
         if (!Objects.equals(user.password(), data.password())) {
             throw new Unauthorized();

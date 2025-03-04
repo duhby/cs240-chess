@@ -1,6 +1,6 @@
 package dataaccess;
 
-import exception.DataAccessException;
+import exception.DataAccess;
 import model.AuthData;
 
 import java.util.HashMap;
@@ -13,18 +13,18 @@ public class AuthAccessMemory implements AuthAccess {
         return data;
     }
 
-    public AuthData get(String authToken) throws DataAccessException {
+    public AuthData get(String authToken) throws DataAccess {
         AuthData data = rows.get(authToken);
         if (data == null) {
-            throw new DataAccessException("Not found");
+            throw new DataAccess("Not found");
         }
         return data;
     }
 
-    public void delete(String authToken) throws DataAccessException {
+    public void delete(String authToken) throws DataAccess {
         AuthData data = rows.remove(authToken);
         if (data == null) {
-            throw new DataAccessException("Not found");
+            throw new DataAccess("Not found");
         }
     }
 
