@@ -4,12 +4,15 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import dataaccess.*;
 import exception.ResponseException;
+import model.GameData;
 import record.*;
 import service.AuthService;
 import service.DatabaseService;
 import service.GameService;
 import service.UserService;
 import spark.*;
+
+import java.util.Collection;
 
 public class Server {
     private final AuthService authService;
@@ -38,6 +41,7 @@ public class Server {
         Spark.post("/session", this::login);
         Spark.delete("/session", this::logout);
         Spark.post("/game", this::createGame);
+        Spark.get("/game", this::listGames);
         Spark.exception(ResponseException.class, this::exceptionHandler);
 
         Spark.awaitInitialization();
@@ -75,6 +79,12 @@ public class Server {
         CreateGameRequest createGameRequest = serialize(req.body(), CreateGameRequest.class);
         CreateGameResponse createGameResponse = this.gameService.create(createGameRequest, authToken);
         return new Gson().toJson(createGameResponse);
+    }
+
+    private Object listGames(Request req, Response res) throws ResponseException {
+        String authToken = req.headers("authorization");
+        ListGamesResponse games = gameService.listGames(authToken);
+        return new Gson().toJson(games);
     }
 
     // Generics moment
