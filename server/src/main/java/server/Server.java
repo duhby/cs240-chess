@@ -53,6 +53,9 @@ public class Server {
 
     private Object register(Request req, Response res) throws ResponseException {
         RegisterRequest registerRequest = serialize(req.body(), RegisterRequest.class);
+        if (registerRequest.username() == null || registerRequest.password() == null || registerRequest.email() == null) {
+            throw ResponseException.badRequest();
+        }
         RegisterResult registerResult = this.userService.register(registerRequest);
         return new Gson().toJson(registerResult);
     }
