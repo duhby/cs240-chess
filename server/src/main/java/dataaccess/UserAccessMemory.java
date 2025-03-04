@@ -2,6 +2,7 @@ package dataaccess;
 
 import java.util.HashMap;
 
+import exception.DataAccessException;
 import model.UserData;
 
 public class UserAccessMemory implements UserAccess {
