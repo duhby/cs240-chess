@@ -4,15 +4,12 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import dataaccess.*;
 import exception.ResponseException;
-import model.GameData;
 import record.*;
 import service.AuthService;
 import service.DatabaseService;
 import service.GameService;
 import service.UserService;
 import spark.*;
-
-import java.util.Collection;
 
 public class Server {
     private final AuthService authService;
@@ -91,6 +88,9 @@ public class Server {
     private Object joinGame(Request req, Response res) throws ResponseException {
         String authToken = req.headers("authorization");
         JoinGameRequest data = serialize(req.body(), JoinGameRequest.class);
+        if (data.playerColor() == null) {
+            throw ResponseException.badRequest();
+        }
         gameService.joinGame(data, authToken);
         return "{}";
     }
