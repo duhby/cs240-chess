@@ -1,9 +1,9 @@
 package dataaccess;
 
+import exception.DataAccessException;
 import model.AuthData;
 
 import java.util.HashMap;
-import java.util.UUID;
 
 public class AuthAccessMemory implements AuthAccess {
     private HashMap<String, AuthData> rows = new HashMap<>();

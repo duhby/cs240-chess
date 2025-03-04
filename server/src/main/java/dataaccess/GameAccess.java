@@ -3,6 +3,7 @@ package dataaccess;
 import java.util.Collection;
 
 import chess.ChessGame;
+import exception.DataAccessException;
 import model.GameData;
 
 public interface GameAccess {
