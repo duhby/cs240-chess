@@ -1,7 +1,7 @@
 package dataaccess;
 
 import chess.ChessGame;
-import exception.DataAccess;
+import exception.ResponseException;
 import model.GameData;
 
 import java.util.Collection;
@@ -15,46 +15,46 @@ public class GameAccessMemory implements GameAccess {
         return data;
     }
 
-    public GameData get(int gameID) throws DataAccess {
+    public GameData get(int gameID) throws ResponseException {
         GameData data = rows.get(gameID);
         if (data == null) {
-            throw new DataAccess("Not found");
+            throw ResponseException.badRequest();
         }
         return data;
     }
 
-    public Collection<GameData> getAll() throws DataAccess {
+    public Collection<GameData> getAll() throws ResponseException {
         if (rows.isEmpty()) {
-            throw new DataAccess("Not found");
+            throw ResponseException.badRequest();
         }
         return rows.values();
     }
 
-    public GameData addPlayer(int gameID, String color, String username) throws DataAccess {
+    public GameData addPlayer(int gameID, String color, String username) throws ResponseException {
         GameData data = this.get(gameID);
         String whiteUsername = data.whiteUsername();
         String blackUsername = data.blackUsername();
         switch (color) {
             case "WHITE" -> whiteUsername = username;
             case "BLACK" -> blackUsername = username;
-            default -> throw new DataAccess("Invalid color");
+            default -> throw ResponseException.badRequest();
         }
         GameData newData = new GameData(data.gameID(), whiteUsername, blackUsername, data.gameName(), data.game());
         newData = rows.replace(gameID, newData);
         return newData;
     }
 
-    public GameData updatePosition(int gameID, ChessGame game) throws DataAccess {
+    public GameData updatePosition(int gameID, ChessGame game) throws ResponseException {
         GameData data = this.get(gameID);
         GameData newData = new GameData(data.gameID(), data.whiteUsername(), data.blackUsername(), data.gameName(), game);
         newData = rows.replace(gameID, newData);
         return newData;
     }
 
-    public void delete(int gameID) throws DataAccess {
+    public void delete(int gameID) throws ResponseException {
         GameData data = rows.remove(gameID);
         if (data == null) {
-            throw new DataAccess("Not found");
+            throw ResponseException.badRequest();
         }
     }
 
