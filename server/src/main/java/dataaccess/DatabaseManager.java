@@ -38,7 +38,7 @@ public class DatabaseManager {
     /**
      * Creates the database and its tables if they do not already exist.
      */
-    static void initializeDatabase() throws ResponseException {
+    public static void initializeDatabase() throws ResponseException {
         String[] createStatements = {
             """
             CREATE TABLE IF NOT EXISTS auth (
@@ -53,7 +53,7 @@ public class DatabaseManager {
               `whiteUsername` varchar(256),
               `blackUsername` varchar(256),
               `gameName` varchar(256) NOT NULL,
-              `game` json NOT NULL,
+              `game` TEXT NOT NULL,
               PRIMARY KEY (`id`)
             )
             """,

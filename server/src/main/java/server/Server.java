@@ -18,7 +18,12 @@ public class Server {
     private final DatabaseService databaseService;
 
     public Server() {
-        AuthAccess authAccess = new AuthAccessMemory();
+        try {
+            DatabaseManager.initializeDatabase();
+        } catch (Exception e) {
+            System.out.println("Failed to start server: " + e.getMessage());
+        }
+        AuthAccess authAccess = new AuthAccessDB();
         GameAccess gameAccess = new GameAccessMemory();
         UserAccess userAccess = new UserAccessMemory();
 
