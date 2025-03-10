@@ -36,19 +36,55 @@ public class DatabaseManager {
     }
 
     /**
-     * Creates the database if it does not already exist.
+     * Creates the database and its tables if they do not already exist.
      */
-    static void createDatabase() throws ResponseException {
+    static void initializeDatabase() throws ResponseException {
+        String[] createStatements = {
+            """
+            CREATE TABLE IF NOT EXISTS auth (
+              `authToken` varchar(256) NOT NULL,
+              `username` varchar(256) NOT NULL,
+              PRIMARY KEY (`auth_token`)
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS game (
+              `id` int NOT NULL AUTO_INCREMENT,
+              `whiteUsername` varchar(256),
+              `blackUsername` varchar(256),
+              `gameName` varchar(256) NOT NULL,
+              `game` json NOT NULL,
+              PRIMARY KEY (`id`)
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS user (
+              `username` varchar(256) NOT NULL,
+              `password` varchar(256) NOT NULL,
+              `email` varchar(256) NOT NULL,
+              PRIMARY KEY (`username`)
+            )
+            """,
+        };
         try {
-            var statement = "CREATE DATABASE IF NOT EXISTS " + DATABASE_NAME;
-            var conn = DriverManager.getConnection(CONNECTION_URL, USER, PASSWORD);
-            try (var preparedStatement = conn.prepareStatement(statement)) {
-                preparedStatement.executeUpdate();
+            try (var baseConn = DriverManager.getConnection(CONNECTION_URL, USER, PASSWORD)) {
+                try (var preparedStatement = baseConn.prepareStatement("CREATE DATABASE IF NOT EXISTS " + DATABASE_NAME)) {
+                    preparedStatement.executeUpdate();
+                }
+            }
+            try (var conn = DatabaseManager.getConnection()) {
+                conn.setCatalog(DATABASE_NAME);
+                for (var statement : createStatements) {
+                    try (var preparedStatement = conn.prepareStatement(statement)) {
+                        preparedStatement.executeUpdate();
+                    }
+                }
             }
         } catch (SQLException e) {
             throw new ResponseException(500, e.getMessage());
         }
     }
+
 
     /**
      * Create a connection to the database and sets the catalog based upon the
