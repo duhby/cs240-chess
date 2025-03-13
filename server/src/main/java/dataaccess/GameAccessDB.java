@@ -88,7 +88,7 @@ public class GameAccessDB implements GameAccess {
                 if (blackUsername != null) {
                     throw ResponseException.alreadyTaken();
                 }
-                statement = "UPDATE game SET whiteUsername=? WHERE id=?";
+                statement = "UPDATE game SET blackUsername=? WHERE id=?";
             }
             default -> throw ResponseException.badRequest();
         }
