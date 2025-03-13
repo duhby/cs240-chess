@@ -8,19 +8,22 @@ import exception.ResponseException;
 record Services(AuthService auth, DatabaseService db, GameService game, UserService user) {}
 
 public class ServiceTests {
-    private Services getServices() {
-        AuthAccess authAccess = new AuthAccessMemory();
-        GameAccess gameAccess = new GameAccessMemory();
-        UserAccess userAccess = new UserAccessMemory();
+    private Services getServices() throws ResponseException {
+        DatabaseManager.initializeDatabase();
+        AuthAccess authAccess = new AuthAccessDB();
+        GameAccess gameAccess = new GameAccessDB();
+        UserAccess userAccess = new UserAccessDB();
         AuthService authService = new AuthService(authAccess, userAccess);
         DatabaseService databaseService = new DatabaseService(authAccess, gameAccess, userAccess);
         GameService gameService = new GameService(authAccess, gameAccess);
         UserService userService = new UserService(authAccess, userAccess);
+
+        databaseService.clear();
         return new Services(authService, databaseService, gameService, userService);
     }
 
     @Test
-    public void clear() {
+    public void clear() throws ResponseException {
         Services services = this.getServices();
 
         try {
@@ -45,7 +48,7 @@ public class ServiceTests {
     }
 
     @Test
-    public void testCreateGameFailure() {
+    public void testCreateGameFailure() throws ResponseException {
         Services services = getServices();
         Assertions.assertThrows(ResponseException.class, () ->
                 services.game().create(new CreateGameRequest(null), "invalidToken"));
@@ -61,7 +64,7 @@ public class ServiceTests {
     }
 
     @Test
-    public void testListGamesFailure() {
+    public void testListGamesFailure() throws ResponseException {
         Services services = getServices();
         Assertions.assertThrows(ResponseException.class, () -> services.game().listGames("invalidToken"));
     }
@@ -75,7 +78,7 @@ public class ServiceTests {
     }
 
     @Test
-    public void testJoinGameFailure() {
+    public void testJoinGameFailure() throws ResponseException {
         Services services = getServices();
         Assertions.assertThrows(ResponseException.class, () -> services.game().joinGame(new JoinGameRequest("asdf", 555), "invalidToken"));
     }
@@ -88,7 +91,7 @@ public class ServiceTests {
     }
 
     @Test
-    public void testRegisterFailure() {
+    public void testRegisterFailure() throws ResponseException {
         Services services = getServices();
         Assertions.assertThrows(ResponseException.class, () -> {
             services.user().register(new RegisterRequest("user", "pass", "email"));
@@ -105,7 +108,7 @@ public class ServiceTests {
     }
 
     @Test
-    public void testLoginFailure() {
+    public void testLoginFailure() throws ResponseException {
         Services services = getServices();
         Assertions.assertThrows(ResponseException.class, () -> services.auth().login(new LoginRequest("user", "wrongPass")));
     }
@@ -118,7 +121,7 @@ public class ServiceTests {
     }
 
     @Test
-    public void testLogoutFailure() {
+    public void testLogoutFailure() throws ResponseException {
         Services services = getServices();
         Assertions.assertThrows(ResponseException.class, () -> services.auth().logout("invalidToken"));
     }
