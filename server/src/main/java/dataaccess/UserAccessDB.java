@@ -18,6 +18,9 @@ public class UserAccessDB implements UserAccess {
                 ps.executeUpdate();
             }
         } catch (SQLException e) {
+            if (e.getMessage().contains("Duplicate entry")) {
+                throw ResponseException.alreadyTaken();
+            }
             throw new ResponseException(500, e.getMessage());
         }
         return data;

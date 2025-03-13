@@ -27,7 +27,7 @@ public class AuthAccessDB implements AuthAccess {
                     if (rs.next()) {
                         return new AuthData(authToken, rs.getString("username"));
                     }
-                    throw new ResponseException(404, "not found");
+                    throw ResponseException.unauthorized();
                 }
             }
         } catch (SQLException e) {
