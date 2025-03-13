@@ -19,7 +19,6 @@ public class AuthAccessDB implements AuthAccess {
         return data;
     }
 
-    @Override
     public AuthData get(String authToken) throws ResponseException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var ps = conn.prepareStatement("SELECT authToken, username FROM auth WHERE authToken=?")) {
@@ -36,7 +35,6 @@ public class AuthAccessDB implements AuthAccess {
         }
     }
 
-    @Override
     public void delete(String authToken) throws ResponseException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var ps = conn.prepareStatement("DELETE FROM auth WHERE id=?")) {
@@ -48,7 +46,6 @@ public class AuthAccessDB implements AuthAccess {
         }
     }
 
-    @Override
     public void deleteAll() throws ResponseException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var ps = conn.prepareStatement("TRUNCATE auth")) {
