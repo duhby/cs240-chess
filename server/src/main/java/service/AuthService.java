@@ -4,10 +4,10 @@ import dataaccess.*;
 import exception.ResponseException;
 import model.AuthData;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 import record.LoginRequest;
 import record.LoginResult;
 
-import java.util.Objects;
 import java.util.UUID;
 
 public class AuthService {
@@ -26,7 +26,7 @@ public class AuthService {
         } catch (ResponseException e) {
             throw ResponseException.unauthorized();
         }
-        if (!Objects.equals(user.password(), data.password())) {
+        if (!BCrypt.checkpw(data.password(), user.password())) {
             throw ResponseException.unauthorized();
         }
         AuthData auth = authAccess.create(new AuthData(UUID.randomUUID().toString(), user.username()));
