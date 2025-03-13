@@ -24,8 +24,8 @@ public class Server {
             System.out.println("Failed to start server: " + e.getMessage());
         }
         AuthAccess authAccess = new AuthAccessDB();
-        GameAccess gameAccess = new GameAccessMemory();
-        UserAccess userAccess = new UserAccessMemory();
+        GameAccess gameAccess = new GameAccessDB();
+        UserAccess userAccess = new UserAccessDB();
 
         authService = new AuthService(authAccess, userAccess);
         gameService = new GameService(authAccess, gameAccess);
