@@ -37,9 +37,12 @@ public class AuthAccessDB implements AuthAccess {
 
     public void delete(String authToken) throws ResponseException {
         try (var conn = DatabaseManager.getConnection()) {
-            try (var ps = conn.prepareStatement("DELETE FROM auth WHERE id=?")) {
+            try (var ps = conn.prepareStatement("DELETE FROM auth WHERE authToken=?")) {
                 ps.setString(1, authToken);
-                ps.executeUpdate();
+                int rowsAffected = ps.executeUpdate();
+                if (rowsAffected == 0) {
+                    throw ResponseException.unauthorized();
+                }
             }
         } catch (SQLException e) {
             throw new ResponseException(500, e.getMessage());
