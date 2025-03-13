@@ -38,7 +38,7 @@ public class UserAccessDB implements UserAccess {
                                 rs.getString("email")
                         );
                     }
-                    throw new ResponseException(404, "not found");
+                    throw ResponseException.badRequest();
                 }
             }
         } catch (SQLException e) {
