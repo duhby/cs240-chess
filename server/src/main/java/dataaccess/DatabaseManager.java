@@ -49,7 +49,7 @@ public class DatabaseManager {
             """,
             """
             CREATE TABLE IF NOT EXISTS game (
-              `id` int NOT NULL AUTO_INCREMENT,
+              `id` int NOT NULL,
               `whiteUsername` varchar(256),
               `blackUsername` varchar(256),
               `gameName` varchar(256) NOT NULL,
