@@ -6,18 +6,17 @@ import server.ServerFacade;
 import java.util.Arrays;
 
 public class ChessClient {
-    private enum State {
+    public enum State {
         SIGNED_IN,
         SIGNED_OUT,
     }
 
-    private final String serverUrl;
     private final ServerFacade server;
-    private State state;
+    public State state;
 
     public ChessClient(String serverUrl) {
-        this.serverUrl = serverUrl;
-        this.server = new ServerFacade();
+        this.server = new ServerFacade(serverUrl);
+        this.state = State.SIGNED_OUT;
     }
 
     public String eval(String input) {
@@ -25,19 +24,33 @@ public class ChessClient {
             var tokens = input.toLowerCase().split(" ");
             var cmd = (tokens.length > 0) ? tokens[0] : "help";
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
-            return switch (cmd) {
-//                case "signin" -> signIn(params);
-//                case "rescue" -> rescuePet(params);
-//                case "list" -> listPets();
-//                case "signout" -> signOut();
-//                case "adopt" -> adoptPet(params);
-//                case "adoptall" -> adoptAllPets();
-                case "quit" -> "quit";
-                default -> this.help();
-            };
+            switch (this.state) {
+                case State.SIGNED_OUT -> {
+                    return switch (cmd) {
+                        case "register" -> register(params);
+                        case "login" -> login(params);
+                        case "quit" -> "quit";
+                        default -> this.help();
+                    };
+                }
+                case State.SIGNED_IN -> {
+                    return switch (cmd) {
+                        case "quit" -> "quit";
+                        default -> this.help();
+                    };
+                }
+            }
         } catch (ResponseException ex) {
             return ex.getMessage();
         }
+    }
+
+    public String register(String... params) throws ResponseException {
+        String response = this.server.register()
+    }
+
+    public String login(String... params) throws ResponseException {
+
     }
 
     public String help() {

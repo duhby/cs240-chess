@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import dataaccess.*;
 import exception.ResponseException;
-import record.*;
 import service.AuthService;
 import service.DatabaseService;
 import service.GameService;

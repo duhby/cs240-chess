@@ -2,7 +2,6 @@ package service;
 
 import dataaccess.*;
 import org.junit.jupiter.api.*;
-import record.*;
 import exception.ResponseException;
 
 record Services(AuthService auth, DatabaseService db, GameService game, UserService user) {}
