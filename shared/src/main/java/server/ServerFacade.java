@@ -26,6 +26,18 @@ public class ServerFacade {
         this.makeRequest("DELETE", "/session", null, null, auth);
     }
 
+    public CreateGameResponse createGame(CreateGameRequest req, String auth) throws ResponseException {
+        return this.makeRequest("POST", "/game", req, CreateGameResponse.class, auth);
+    }
+
+    public ListGamesResponse listGames(String auth) throws ResponseException {
+        return this.makeRequest("GET", "/game", null, ListGamesResponse.class, auth);
+    }
+
+    public void joinGame(JoinGameRequest req, String auth) throws ResponseException {
+        this.makeRequest("PUT", "/game", req, JoinGameRequest.class, auth);
+    }
+
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, String auth) throws ResponseException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();

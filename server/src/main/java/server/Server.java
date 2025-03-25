@@ -9,6 +9,7 @@ import service.DatabaseService;
 import service.GameService;
 import service.UserService;
 import spark.*;
+import record.*;
 
 public class Server {
     private final AuthService authService;
