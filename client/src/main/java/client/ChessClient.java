@@ -2,6 +2,7 @@ package client;
 
 import exception.ResponseException;
 import server.ServerFacade;
+import record.*
 
 import java.util.Arrays;
 
@@ -12,11 +13,13 @@ public class ChessClient {
     }
 
     private final ServerFacade server;
+    private String authToken;
     public State state;
 
     public ChessClient(String serverUrl) {
         this.server = new ServerFacade(serverUrl);
         this.state = State.SIGNED_OUT;
+        this.authToken = null;
     }
 
     public String eval(String input) {
@@ -46,7 +49,13 @@ public class ChessClient {
     }
 
     public String register(String... params) throws ResponseException {
-        String response = this.server.register()
+        if (params.length != 3) {
+            return this.help();
+        }
+        RegisterResult response = this.server.register(new RegisterRequest(params[0], params[1], params[2]));
+        this.state = State.SIGNED_IN;
+        this.authToken = response.authToken();
+        return "Registered as " + response.username();
     }
 
     public String login(String... params) throws ResponseException {

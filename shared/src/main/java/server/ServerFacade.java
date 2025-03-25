@@ -15,18 +15,18 @@ public class ServerFacade {
     }
 
     public RegisterResult register(RegisterRequest req) throws ResponseException {
-        return this.makeRequest("POST", "/user", req, null);
+        return this.makeRequest("POST", "/user", req, RegisterResult.class, null);
     }
 
     public LoginResult login(LoginRequest req) throws ResponseException {
-        return this.makeRequest("POST", "/session", req, null);
+        return this.makeRequest("POST", "/session", req, LoginResult.class, null);
     }
 
     public void logout(String auth) throws ResponseException {
-        this.makeRequest("DELETE", "/session", null, auth);
+        this.makeRequest("DELETE", "/session", null, null, auth);
     }
 
-    private String makeRequest(String method, String path, String request, String auth) throws ResponseException {
+    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, String auth) throws ResponseException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
@@ -36,12 +36,10 @@ public class ServerFacade {
             }
             http.setDoOutput(true);
 
-            if (request != null) {
-                writeBody(request, http);
-            }
+            writeBody(request, http);
             http.connect();
             throwIfNotSuccessful(http);
-            return readBody(http);
+            return readBody(http, responseClass);
         } catch (ResponseException ex) {
             throw ex;
         } catch (Exception ex) {
@@ -59,17 +57,17 @@ public class ServerFacade {
         }
     }
 
-    private static String readBody(HttpURLConnection http) throws IOException {
-        BufferedReader in = new BufferedReader(new InputStreamReader(http.getInputStream()));
-        String inputLine;
-        StringBuilder response = new StringBuilder();
-
-        while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
+    private static <T> T readBody(HttpURLConnection http, Class<T> responseClass) throws IOException {
+        T response = null;
+        if (http.getContentLength() < 0) {
+            try (InputStream respBody = http.getInputStream()) {
+                InputStreamReader reader = new InputStreamReader(respBody);
+                if (responseClass != null) {
+                    response = new Gson().fromJson(reader, responseClass);
+                }
+            }
         }
-        in.close();
-
-        return response.toString();
+        return response;
     }
 
     private void throwIfNotSuccessful(HttpURLConnection http) throws IOException, ResponseException {
