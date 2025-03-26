@@ -37,8 +37,9 @@ public class ChessClient {
                     case "logout" -> this.logout();
                     case "create" -> this.createGame(params);
                     case "list" -> this.listGames();
+                    case "join" -> this.joinGame();
                     case "quit" -> "quit";
-                    // join, observe
+                    // observe
                     default -> this.help();
                 };
             }
@@ -79,19 +80,53 @@ public class ChessClient {
             return this.help();
         }
         this.server.createGame(new CreateGameRequest(params[0]), this.authToken);
-//        ListGamesResponse gameList = this.server.listGames(this.authToken);
-//        GameData game = null;
-//        for (GameData gameData : gameList.games()) {
-//            if (result.gameID() == gameData.gameID()) {
-//                game = gameData;
-//            }
-//        }
-//        if (game == null) {
-//            throw new ResponseException(500, "Unknown error");
-//        }
-//        this.gameData = game;
-//        return ChessGame.getBoardDisplay(this.gameData.game().getBoard(), this.gameData.whiteUsername().equals(this.username));
         return "Created game \"" + params[0] + '"';
+    }
+
+    public String joinGame(String... params) throws ResponseException {
+        if (params.length > 2 || params.length < 1) {
+            return this.help();
+        }
+
+        int index = 0;
+        try {
+            index = Integer.parseInt(params[0]) - 1;
+        } catch (NumberFormatException e) {
+            return this.help();
+        }
+
+        ListGamesResponse gameList = this.server.listGames(this.authToken);
+        GameData joinedGame = null;
+        int i = 0;
+        for (GameData gameData : gameList.games()) {
+            if (i == index) {
+                joinedGame = gameData;
+            }
+        }
+        if (joinedGame == null) {
+            throw new ResponseException(400, "Invalid Game ID");
+        }
+        String teamColor;
+        if (params.length == 2) {
+            teamColor = params[1];
+            if (!teamColor.equals("WHITE") && !teamColor.equals("BLACK")) {
+                return this.help();
+            }
+        } else {
+            if (joinedGame.whiteUsername() == null) {
+                teamColor = "WHITE";
+            } else if (joinedGame.blackUsername() == null) {
+                teamColor = "BLACK";
+            } else {
+                throw ResponseException.alreadyTaken();
+            }
+        }
+
+        JoinGameRequest req = new JoinGameRequest(teamColor, joinedGame.gameID());
+        this.server.joinGame(req, this.authToken);
+
+        this.gameData = joinedGame;
+        return ChessGame.getBoardDisplay(this.gameData.game().getBoard(), this.gameData.whiteUsername().equals(this.username));
     }
 
     public String listGames() throws ResponseException {
