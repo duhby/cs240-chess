@@ -14,7 +14,7 @@ public class ChessClient {
     private final ServerFacade server;
     private String authToken = null;
     private GameData gameData = null;
-    private String username = null;
+    public String username = null;
 
     public ChessClient(String serverUrl) {
         this.server = new ServerFacade(serverUrl);
@@ -78,7 +78,7 @@ public class ChessClient {
         if (params.length != 1) {
             return this.help();
         }
-        CreateGameResponse result = this.server.createGame(new CreateGameRequest(params[0]), this.authToken);
+        this.server.createGame(new CreateGameRequest(params[0]), this.authToken);
 //        ListGamesResponse gameList = this.server.listGames(this.authToken);
 //        GameData game = null;
 //        for (GameData gameData : gameList.games()) {

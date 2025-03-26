@@ -32,6 +32,10 @@ public class Repl {
     }
 
     private void printPrompt() {
-        System.out.print("\n" + "[" + this.client.state() + "]" + RESET_BG_COLOR + RESET_TEXT_COLOR + ">>> " + SET_TEXT_COLOR_GREEN);
+        String bracketText = "LOGGED_OUT";
+        if (this.client.state().equals("LOGGED_IN")) {
+            bracketText = "LOGGED_IN: " + this.client.username;
+        }
+        System.out.print("\n" + RESET_BG_COLOR + RESET_TEXT_COLOR + "[" + bracketText + "] " + ">>> " + SET_TEXT_COLOR_GREEN);
     }
 }
