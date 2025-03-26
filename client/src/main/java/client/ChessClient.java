@@ -2,8 +2,10 @@ package client;
 
 import exception.ResponseException;
 import model.GameData;
+import model.UserData;
 import server.ServerFacade;
 import record.*;
+import ui.ChessGame;
 
 import java.util.Arrays;
 
@@ -11,6 +13,7 @@ public class ChessClient {
     private final ServerFacade server;
     private String authToken = null;
     private GameData gameData = null;
+    private String username = null;
 
     public ChessClient(String serverUrl) {
         this.server = new ServerFacade(serverUrl);
@@ -34,6 +37,7 @@ public class ChessClient {
                     case "create" -> this.createGame(params);
                     case "list" -> this.listGames();
                     case "quit" -> "quit";
+                    // join, observe
                     default -> this.help();
                 };
             }
@@ -48,6 +52,7 @@ public class ChessClient {
         }
         RegisterResult result = this.server.register(new RegisterRequest(params[0], params[1], params[2]));
         this.authToken = result.authToken();
+        this.username = result.username();
         return "Registered as " + result.username();
     }
 
@@ -57,12 +62,14 @@ public class ChessClient {
         }
         LoginResult result = this.server.login(new LoginRequest(params[0], params[1]));
         this.authToken = result.authToken();
+        this.username = result.username();
         return "Logged in as " + result.username();
     }
 
     public String logout() throws ResponseException {
         this.server.logout(this.authToken);
         this.authToken = null;
+        this.username = null;
         return "Logged out";
     }
 
@@ -71,7 +78,18 @@ public class ChessClient {
             return this.help();
         }
         CreateGameResponse result = this.server.createGame(new CreateGameRequest(params[0]), this.authToken);
-        return "todo";
+        ListGamesResponse gameList = this.server.listGames(this.authToken);
+        GameData game = null;
+        for (GameData gameData : gameList.games()) {
+            if (result.gameID() == gameData.gameID()) {
+                game = gameData;
+            }
+        }
+        if (game == null) {
+            throw new ResponseException(500, "Unknown error");
+        }
+        this.gameData = game;
+        return ChessGame.getBoardDisplay(this.gameData.game().getBoard(), this.gameData.whiteUsername().equals(this.username));
     }
 
     public String listGames() throws ResponseException {
