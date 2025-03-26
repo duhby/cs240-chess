@@ -2,6 +2,7 @@ package server;
 
 import com.google.gson.Gson;
 import exception.ResponseException;
+import model.GameData;
 import record.*;
 
 import java.io.*;

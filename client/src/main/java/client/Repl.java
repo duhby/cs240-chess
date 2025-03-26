@@ -32,6 +32,6 @@ public class Repl {
     }
 
     private void printPrompt() {
-        System.out.print("\n" + "[" + this.client.state.name() + "]" + RESET_BG_COLOR + RESET_TEXT_COLOR + ">>> " + SET_TEXT_COLOR_GREEN);
+        System.out.print("\n" + "[" + this.client.state() + "]" + RESET_BG_COLOR + RESET_TEXT_COLOR + ">>> " + SET_TEXT_COLOR_GREEN);
     }
 }

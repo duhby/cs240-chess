@@ -5,10 +5,7 @@ import dataaccess.*;
 import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
-import record.CreateGameRequest;
-import record.CreateGameResponse;
-import record.JoinGameRequest;
-import record.ListGamesResponse;
+import record.*;
 
 import java.util.Collection;
 
