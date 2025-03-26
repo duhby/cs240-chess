@@ -8,6 +8,7 @@ import record.*;
 import ui.ChessGame;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 public class ChessClient {
     private final ServerFacade server;
@@ -78,23 +79,35 @@ public class ChessClient {
             return this.help();
         }
         CreateGameResponse result = this.server.createGame(new CreateGameRequest(params[0]), this.authToken);
-        ListGamesResponse gameList = this.server.listGames(this.authToken);
-        GameData game = null;
-        for (GameData gameData : gameList.games()) {
-            if (result.gameID() == gameData.gameID()) {
-                game = gameData;
-            }
-        }
-        if (game == null) {
-            throw new ResponseException(500, "Unknown error");
-        }
-        this.gameData = game;
-        return ChessGame.getBoardDisplay(this.gameData.game().getBoard(), this.gameData.whiteUsername().equals(this.username));
+//        ListGamesResponse gameList = this.server.listGames(this.authToken);
+//        GameData game = null;
+//        for (GameData gameData : gameList.games()) {
+//            if (result.gameID() == gameData.gameID()) {
+//                game = gameData;
+//            }
+//        }
+//        if (game == null) {
+//            throw new ResponseException(500, "Unknown error");
+//        }
+//        this.gameData = game;
+//        return ChessGame.getBoardDisplay(this.gameData.game().getBoard(), this.gameData.whiteUsername().equals(this.username));
+        return "Created game \"" + params[0] + '"';
     }
 
     public String listGames() throws ResponseException {
         ListGamesResponse result = this.server.listGames(this.authToken);
-        return "todo";
+        StringBuilder gameList = new StringBuilder();
+
+        int i = 1;
+        for (GameData gameData : result.games()) {
+            String whiteUsername = Objects.requireNonNullElse(gameData.whiteUsername(), "-");
+            String blackUsername = Objects.requireNonNullElse(gameData.blackUsername(), "-");
+            gameList.append("[").append(i).append("] Game \"").append(gameData.gameName()).append("\" White: ").append(whiteUsername).append(" Black: ").append(blackUsername).append("\n");
+        }
+        if (gameList.isEmpty()) {
+            return "No games. Use `create` to create one.";
+        }
+        return gameList.toString();
     }
 
     public String help() {
