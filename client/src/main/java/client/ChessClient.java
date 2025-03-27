@@ -110,9 +110,10 @@ public class ChessClient {
         String teamColor;
         if (params.length == 2) {
             teamColor = params[1];
-            if (!teamColor.equals("WHITE") && !teamColor.equals("BLACK")) {
+            if (!teamColor.equals("white") && !teamColor.equals("black")) {
                 return this.help();
             }
+            teamColor = teamColor.toUpperCase();
         } else {
             if (joinedGame.whiteUsername() == null) {
                 teamColor = "WHITE";
