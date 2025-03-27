@@ -77,6 +77,9 @@ public class GameAccessDB implements GameAccess {
         String whiteUsername = data.whiteUsername();
         String blackUsername = data.blackUsername();
         String statement;
+        if (username.equals(whiteUsername) || username.equals(blackUsername)) {
+            throw ResponseException.badRequest();
+        }
         switch (color) {
             case "WHITE" -> {
                 if (whiteUsername != null) {

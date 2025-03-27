@@ -2,12 +2,12 @@ package client;
 
 import exception.ResponseException;
 import model.GameData;
-import model.UserData;
 import server.ServerFacade;
 import record.*;
 import ui.ChessGame;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Objects;
 
 public class ChessClient {
@@ -15,6 +15,7 @@ public class ChessClient {
     private String authToken = null;
     private GameData gameData = null;
     public String username = null;
+    private HashMap<Integer, Integer> gameIDs = new HashMap<>();
 
     public ChessClient(String serverUrl) {
         this.server = new ServerFacade(serverUrl);
@@ -37,7 +38,7 @@ public class ChessClient {
                     case "logout" -> this.logout();
                     case "create" -> this.createGame(params);
                     case "list" -> this.listGames();
-                    case "join" -> this.joinGame();
+                    case "join" -> this.joinGame(params);
                     case "quit" -> "quit";
                     // observe
                     default -> this.help();
@@ -88,19 +89,19 @@ public class ChessClient {
             return this.help();
         }
 
-        int index = 0;
+        int gameID;
         try {
-            index = Integer.parseInt(params[0]) - 1;
-        } catch (NumberFormatException e) {
-            return this.help();
+            gameID = this.gameIDs.get(Integer.parseInt(params[0]));
+        } catch (Throwable e) {
+            throw new ResponseException(400, "Invalid Game ID");
         }
 
         ListGamesResponse gameList = this.server.listGames(this.authToken);
         GameData joinedGame = null;
-        int i = 0;
         for (GameData gameData : gameList.games()) {
-            if (i == index) {
+            if (gameData.gameID() == gameID) {
                 joinedGame = gameData;
+                break;
             }
         }
         if (joinedGame == null) {
@@ -126,7 +127,7 @@ public class ChessClient {
         this.server.joinGame(req, this.authToken);
 
         this.gameData = joinedGame;
-        return ChessGame.getBoardDisplay(this.gameData.game().getBoard(), this.gameData.whiteUsername().equals(this.username));
+        return ChessGame.getBoardDisplay(this.gameData.game().getBoard(), this.username.equals(this.gameData.whiteUsername()));
     }
 
     public String listGames() throws ResponseException {
@@ -138,6 +139,8 @@ public class ChessClient {
             String whiteUsername = Objects.requireNonNullElse(gameData.whiteUsername(), "-");
             String blackUsername = Objects.requireNonNullElse(gameData.blackUsername(), "-");
             gameList.append("[").append(i).append("] Game \"").append(gameData.gameName()).append("\" White: ").append(whiteUsername).append(" Black: ").append(blackUsername).append("\n");
+            this.gameIDs.put(i, gameData.gameID());
+            i++;
         }
         if (gameList.isEmpty()) {
             return "No games. Use `create` to create one.";
