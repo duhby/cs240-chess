@@ -39,8 +39,8 @@ public class ChessClient {
                     case "create" -> this.createGame(params);
                     case "list" -> this.listGames();
                     case "join" -> this.joinGame(params);
+                    case "observe" -> this.spectate(params);
                     case "quit" -> "quit";
-                    // observe
                     default -> this.help();
                 };
             }
@@ -126,8 +126,44 @@ public class ChessClient {
         JoinGameRequest req = new JoinGameRequest(teamColor, joinedGame.gameID());
         this.server.joinGame(req, this.authToken);
 
-        this.gameData = joinedGame;
+        gameList = this.server.listGames(this.authToken);
+        for (GameData gameData : gameList.games()) {
+            if (gameData.gameID() == gameID) {
+                this.gameData = gameData;
+                break;
+            }
+        }
+        if (this.gameData == null) {
+            throw new ResponseException(500, "Unknown error");
+        }
+
         return ChessGame.getBoardDisplay(this.gameData.game().getBoard(), this.username.equals(this.gameData.whiteUsername()));
+    }
+
+    public String spectate(String... params) throws ResponseException {
+        if (params.length != 1) {
+            return this.help();
+        }
+
+        int gameID;
+        try {
+            gameID = this.gameIDs.get(Integer.parseInt(params[0]));
+        } catch (Throwable e) {
+            throw new ResponseException(400, "Invalid Game ID");
+        }
+
+        ListGamesResponse gameList = this.server.listGames(this.authToken);
+        for (GameData gameData : gameList.games()) {
+            if (gameData.gameID() == gameID) {
+                this.gameData = gameData;
+                break;
+            }
+        }
+        if (this.gameData == null) {
+            throw new ResponseException(400, "Invalid Game ID");
+        }
+
+        return ChessGame.getBoardDisplay(this.gameData.game().getBoard(), true);
     }
 
     public String listGames() throws ResponseException {
