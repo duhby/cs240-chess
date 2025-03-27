@@ -2,7 +2,6 @@ package server;
 
 import com.google.gson.Gson;
 import exception.ResponseException;
-import model.GameData;
 import record.*;
 
 import java.io.*;
@@ -27,8 +26,8 @@ public class ServerFacade {
         this.makeRequest("DELETE", "/session", null, null, auth);
     }
 
-    public CreateGameResponse createGame(CreateGameRequest req, String auth) throws ResponseException {
-        return this.makeRequest("POST", "/game", req, CreateGameResponse.class, auth);
+    public void createGame(CreateGameRequest req, String auth) throws ResponseException {
+        this.makeRequest("POST", "/game", req, CreateGameResponse.class, auth);
     }
 
     public ListGamesResponse listGames(String auth) throws ResponseException {
