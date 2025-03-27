@@ -15,7 +15,7 @@ public class ChessClient {
     private String authToken = null;
     private GameData gameData = null;
     public String username = null;
-    private HashMap<Integer, Integer> gameIDs = new HashMap<>();
+    private final HashMap<Integer, Integer> gameIDs = new HashMap<>();
 
     public ChessClient(String serverUrl) {
         this.server = new ServerFacade(serverUrl);
@@ -175,7 +175,8 @@ public class ChessClient {
         for (GameData gameData : result.games()) {
             String whiteUsername = Objects.requireNonNullElse(gameData.whiteUsername(), "-");
             String blackUsername = Objects.requireNonNullElse(gameData.blackUsername(), "-");
-            gameList.append("[").append(i).append("] Game \"").append(gameData.gameName()).append("\" White: ").append(whiteUsername).append(" Black: ").append(blackUsername).append("\n");
+            gameList.append("[").append(i).append("] Game \"").append(gameData.gameName());
+            gameList.append("\" White: ").append(whiteUsername).append(" Black: ").append(blackUsername).append("\n");
             this.gameIDs.put(i, gameData.gameID());
             i++;
         }
