@@ -18,14 +18,14 @@ public class ChessGame {
 
         display.append(EscapeSequences.SET_TEXT_BOLD);
 
-        addColDisplay(display);
+        addColDisplay(display, isWhite);
 
         for (int row = startRow; row != endRow; row += rowIncrement) {
             addRowNumber(display, row);
 
             for (int col = startCol; col != endCol; col += colIncrement) {
                 // square color
-                boolean isLightSquare = (row + col) % 2 == 0;
+                boolean isLightSquare = (row + col) % 2 != 0;
                 String bgColor = isLightSquare ?
                         EscapeSequences.SET_BG_COLOR_WHITE :
                         EscapeSequences.SET_BG_COLOR_BLACK;
@@ -53,7 +53,7 @@ public class ChessGame {
             display.append("\n");
         }
 
-        addColDisplay(display);
+        addColDisplay(display, isWhite);
 
         display.append(EscapeSequences.RESET_TEXT_BOLD_FAINT);
 
@@ -67,10 +67,14 @@ public class ChessGame {
         resetFormatting(display);
     }
 
-    private static void addColDisplay(StringBuilder display) {
+    private static void addColDisplay(StringBuilder display, boolean isWhite) {
         display.append(EscapeSequences.SET_TEXT_COLOR_BLACK);
         display.append(EscapeSequences.SET_BG_COLOR_LIGHT_GREY);
-        display.append("    a  b  c  d  e  f  g  h    ");
+        if (isWhite) {
+            display.append("    a  b  c  d  e  f  g  h    ");
+        } else {
+            display.append("    h  g  f  e  d  c  b  a    ");
+        }
         display.append(EscapeSequences.RESET_TEXT_COLOR);
         display.append(EscapeSequences.RESET_BG_COLOR);
         display.append("\n");

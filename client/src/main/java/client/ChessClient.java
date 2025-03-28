@@ -85,7 +85,7 @@ public class ChessClient {
     }
 
     public String joinGame(String... params) throws ResponseException {
-        if (params.length > 2 || params.length < 1) {
+        if (params.length != 2) {
             return this.help();
         }
 
