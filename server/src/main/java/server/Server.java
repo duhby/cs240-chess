@@ -34,7 +34,7 @@ public class Server {
         userService = new UserService(authAccess, userAccess);
         databaseService = new DatabaseService(authAccess, gameAccess, userAccess);
 
-        webSocketHandler = new WebSocketHandler();
+        webSocketHandler = new WebSocketHandler(authAccess, gameAccess);
     }
 
     public int run(int desiredPort) {
