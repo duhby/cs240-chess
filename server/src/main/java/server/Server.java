@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import dataaccess.*;
 import exception.ResponseException;
+import server.websocket.WebSocketHandler;
 import service.AuthService;
 import service.DatabaseService;
 import service.GameService;
@@ -16,6 +17,7 @@ public class Server {
     private final GameService gameService;
     private final UserService userService;
     private final DatabaseService databaseService;
+    private final WebSocketHandler webSocketHandler;
 
     public Server() {
         try {
@@ -31,12 +33,16 @@ public class Server {
         gameService = new GameService(authAccess, gameAccess);
         userService = new UserService(authAccess, userAccess);
         databaseService = new DatabaseService(authAccess, gameAccess, userAccess);
+
+        webSocketHandler = new WebSocketHandler();
     }
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
+
+        Spark.webSocket("/ws", webSocketHandler);
 
         Spark.delete("/db", this::deleteAll);
         Spark.post("/user", this::register);
