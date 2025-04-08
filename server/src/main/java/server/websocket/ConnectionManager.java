@@ -15,14 +15,6 @@ public class ConnectionManager {
         connections.put(username, connection);
     }
 
-    public void send(String username, ServerMessage message) throws IOException {
-        for (var c : connections.values()) {
-            if (c.username.equals(username) && c.session.isOpen()) {
-                c.send(message.toString());
-            }
-        }
-    }
-
     public void remove(String username) {
         connections.remove(username);
     }
