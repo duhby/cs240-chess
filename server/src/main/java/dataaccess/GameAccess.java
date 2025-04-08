@@ -11,5 +11,6 @@ public interface GameAccess {
     Collection<GameData> getAll() throws ResponseException;
     void edit(GameData data) throws ResponseException;
     void addPlayer(int gameID, String color, String username) throws ResponseException;
+    void removePlayer(int gameID, String username) throws ResponseException;
     void deleteAll() throws ResponseException;
 }

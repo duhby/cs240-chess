@@ -3,6 +3,7 @@ package dataaccess;
 import exception.ResponseException;
 import model.GameData;
 
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -48,6 +49,21 @@ public class GameAccessMemory implements GameAccess {
                 blackUsername = username;
             }
             default -> throw ResponseException.badRequest();
+        }
+        GameData newData = new GameData(data.gameID(), whiteUsername, blackUsername, data.gameName(), data.game());
+        rows.replace(gameID, newData);
+    }
+
+    public void removePlayer(int gameID, String username) throws ResponseException {
+        GameData data = this.get(gameID);
+        String whiteUsername = data.whiteUsername();
+        String blackUsername = data.blackUsername();
+        if (username.equals(data.whiteUsername())) {
+            whiteUsername = null;
+        } else if (username.equals(data.blackUsername())) {
+            blackUsername = null;
+        } else {
+            throw ResponseException.badRequest();
         }
         GameData newData = new GameData(data.gameID(), whiteUsername, blackUsername, data.gameName(), data.game());
         rows.replace(gameID, newData);

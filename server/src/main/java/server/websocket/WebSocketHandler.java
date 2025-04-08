@@ -63,14 +63,23 @@ public class WebSocketHandler {
         switch (command.getCommandType()) {
             case CONNECT -> this.connect(username, game, session);
             case MAKE_MOVE -> this.makeMove(username, game, chessMove, session);
-            case LEAVE -> this.leave(username, game);
-            case RESIGN -> this.resign(username, game);
+            case LEAVE -> this.leave(username, game, session);
+            case RESIGN -> this.resign(username, game, session);
         }
     }
 
     private void sendError(Session session, String message) throws IOException {
         Error error = new Error(message);
         session.getRemote().sendString(error.toString());
+    }
+
+    private void leave(String username, GameData game, Session session) throws IOException {
+        connections.remove(username);
+        try {
+            gameAccess.removePlayer(game.gameID(), username);
+        } catch (ResponseException e) {
+            sendError(session, e.getMessage());
+        }
     }
 
     private void connect(String username, GameData game, Session session) throws IOException {

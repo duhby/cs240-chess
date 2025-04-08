@@ -120,6 +120,26 @@ public class GameAccessDB implements GameAccess {
         }
     }
 
+    public void removePlayer(int gameID, String username) throws ResponseException {
+        GameData data = this.get(gameID);
+        String statement;
+        if (username.equals(data.whiteUsername())) {
+            statement = "UPDATE game SET whiteUsername=NULL WHERE id=?";
+        } else if (username.equals(data.blackUsername())) {
+            statement = "UPDATE game SET blackUsername=NULL WHERE id=?";
+        } else {
+            throw ResponseException.badRequest();
+        }
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, data.gameID());
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new ResponseException(500, e.getMessage());
+        }
+    }
+
     public void deleteAll() throws ResponseException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var ps = conn.prepareStatement("TRUNCATE game")) {
