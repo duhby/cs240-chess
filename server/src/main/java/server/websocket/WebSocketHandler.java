@@ -101,6 +101,39 @@ public class WebSocketHandler {
         } catch (InvalidMoveException e) {
             this.sendError(session, e.getMessage());
         }
+        try {
+            this.gameAccess.edit(game);
+        } catch (ResponseException e) {
+            this.sendError(session, e.getMessage());
+        }
+        connections.broadcast(null, game.gameID(), new LoadGame(game));
+
+        Notification moveNotification = new Notification(String.format("%s made the move %s", username, move));
+        connections.broadcast(username, game.gameID(), moveNotification);
+
+        // Check etc. notifications
+        ChessGame.TeamColor color = game.game().getBoard().getPiece(move.getStartPosition()).getTeamColor();
+        ChessGame.TeamColor otherColor;
+        String otherUsername;
+        if (color == ChessGame.TeamColor.BLACK) {
+            otherColor = ChessGame.TeamColor.WHITE;
+            otherUsername = game.whiteUsername();
+        } else {
+            otherColor = ChessGame.TeamColor.BLACK;
+            otherUsername = game.blackUsername();
+        }
+        String message = null;
+        if (game.game().isInCheckmate(otherColor)) {
+            message = "is in checkmate";
+        } else if (game.game().isInStalemate(otherColor)) {
+            message = "is in stalemate";
+        } else if (game.game().isInCheck(otherColor)) {
+            message = "is in check";
+        }
+        if (message != null) {
+            Notification status = new Notification(String.format("%s %s", otherUsername, message));
+            connections.broadcast(null, game.gameID(), status);
+        }
     }
 
 //

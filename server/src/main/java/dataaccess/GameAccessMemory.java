@@ -22,6 +22,10 @@ public class GameAccessMemory implements GameAccess {
         return data;
     }
 
+    public void edit(GameData data) throws ResponseException {
+        rows.replace(data.gameID(), data);
+    }
+
     public Collection<GameData> getAll() {
         return rows.values();
     }

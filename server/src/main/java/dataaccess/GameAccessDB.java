@@ -49,7 +49,7 @@ public class GameAccessDB implements GameAccess {
     }
 
     // Does not validate moves or turns etc
-    public GameData edit(GameData data) throws ResponseException {
+    public void edit(GameData data) throws ResponseException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var ps = conn.prepareStatement("UPDATE game SET game=? WHERE id=?")) {
                 ps.setString(1, new Gson().toJson(data.game()));
@@ -63,7 +63,6 @@ public class GameAccessDB implements GameAccess {
         } catch (SQLException e) {
             throw new ResponseException(500, e.getMessage());
         }
-        return this.get(data.gameID());
     }
 
     public Collection<GameData> getAll() throws ResponseException {
