@@ -74,12 +74,14 @@ public class WebSocketHandler {
     }
 
     private void leave(String username, GameData game, Session session) throws IOException {
-        connections.remove(username);
         try {
             gameAccess.removePlayer(game.gameID(), username);
         } catch (ResponseException e) {
             sendError(session, e.getMessage());
         }
+        connections.remove(username);
+        Notification notification = new Notification(String.format("%s left the game", username));
+        connections.broadcast(username, game.gameID(), notification);
     }
 
     private void connect(String username, GameData game, Session session) throws IOException {
@@ -144,22 +146,4 @@ public class WebSocketHandler {
             connections.broadcast(null, game.gameID(), status);
         }
     }
-
-//
-//    private void exit(String visitorName) throws IOException {
-//        connections.remove(visitorName);
-//        var message = String.format("%s left the shop", visitorName);
-//        var notification = new Notification(Notification.Type.DEPARTURE, message);
-//        connections.broadcast(visitorName, notification);
-//    }
-//
-//    public void makeNoise(String petName, String sound) throws ResponseException {
-//        try {
-//            var message = String.format("%s says %s", petName, sound);
-//            var notification = new Notification(Notification.Type.NOISE, message);
-//            connections.broadcast("", notification);
-//        } catch (Exception ex) {
-//            throw new ResponseException(500, ex.getMessage());
-//        }
-//    }
 }
