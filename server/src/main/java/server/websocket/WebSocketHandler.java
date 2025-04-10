@@ -84,6 +84,17 @@ public class WebSocketHandler {
         connections.broadcast(username, game.gameID(), notification);
     }
 
+    private void resign(String username, GameData game, Session session) throws IOException {
+        game.game().setTeamTurn(null);
+        try {
+            gameAccess.edit(game);
+        } catch (ResponseException e) {
+            sendError(session, e.getMessage());
+        }
+        Notification notification = new Notification(String.format("%s resigned", username));
+        connections.broadcast(null, game.gameID(), notification);
+    }
+
     private void connect(String username, GameData game, Session session) throws IOException {
         connections.add(username, game.gameID(), session);
         LoadGame loadGame = new LoadGame(game);
