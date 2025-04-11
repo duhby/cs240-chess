@@ -1,5 +1,6 @@
 package client;
 
+import client.websocket.NotificationHandler;
 import model.GameData;
 import ui.ChessGame;
 import websocket.messages.Error;
@@ -11,11 +12,11 @@ import static ui.EscapeSequences.*;
 
 import java.util.Scanner;
 
-public class Repl {
+public class Repl implements NotificationHandler {
     private final ChessClient client;
 
     public Repl (String serverUrl) {
-        this.client = new ChessClient(serverUrl);
+        this.client = new ChessClient(serverUrl, this);
     }
 
     public void run() {
@@ -59,16 +60,16 @@ public class Repl {
 
     public void notify(ServerMessage message) {
         System.out.print("\n" + RESET_BG_COLOR);
-        if (message instanceof Notification) {
-            System.out.println(SET_TEXT_COLOR_WHITE + ((Notification) message).getMessage());
-        } else if (message instanceof Error) {
-            System.out.println(SET_TEXT_COLOR_RED + ((Error) message).getErrorMessage());
-        } else if (message instanceof LoadGame) {
-            GameData gameData = ((LoadGame) message).getGameData();
-            // Observers should view it from the white perspective
-            System.out.println(ChessGame.getBoardDisplay(gameData.game().getBoard(), !this.client.username.equals(gameData.blackUsername())));
-        } else {
-            System.out.println(SET_TEXT_COLOR_RED + "Unknown message received");
+        switch (message) {
+            case Notification notification -> System.out.println(SET_TEXT_COLOR_WHITE + notification.getMessage());
+            case Error error -> System.out.println(SET_TEXT_COLOR_RED + error.getErrorMessage());
+            case LoadGame loadGame -> {
+                GameData gameData = loadGame.getGameData();
+                this.client.gameData = gameData;
+                // Observers should view it from the white perspective
+                System.out.println(ChessGame.getBoardDisplay(gameData.game().getBoard(), !this.client.username.equals(gameData.blackUsername())));
+            }
+            case null, default -> System.out.println(SET_TEXT_COLOR_RED + "Unknown message received");
         }
         printPrompt();
     }

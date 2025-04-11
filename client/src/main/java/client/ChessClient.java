@@ -1,5 +1,7 @@
 package client;
 
+import client.websocket.NotificationHandler;
+import client.websocket.WebsocketFacade;
 import exception.ResponseException;
 import model.GameData;
 import server.ServerFacade;
@@ -16,10 +18,15 @@ public class ChessClient {
     public GameData gameData = null;
     public String username = null;
     public boolean observing = false;
+    private final String serverUrl;
+    private final NotificationHandler notificationHandler;
+    private WebsocketFacade websocketFacade;
     private final HashMap<Integer, Integer> gameIDs = new HashMap<>();
 
-    public ChessClient(String serverUrl) {
+    public ChessClient(String serverUrl, NotificationHandler notificationHandler) {
         this.server = new ServerFacade(serverUrl);
+        this.serverUrl = serverUrl;
+        this.notificationHandler = notificationHandler;
     }
 
     public String eval(String input) {
@@ -74,6 +81,11 @@ public class ChessClient {
 
     public String leaveObserving() {
         this.observing = false;
+        this.gameData = null;
+    }
+
+    public String leaveGame() {
+        this.gameData = null;
     }
 
     public String redraw() {
@@ -169,6 +181,9 @@ public class ChessClient {
             throw new ResponseException(500, "Unknown error");
         }
 
+        this.websocketFacade = new WebsocketFacade(this.serverUrl, this.notificationHandler);
+        this.websocketFacade.joinGame(this.authToken, this.gameData.gameID());
+
         return ChessGame.getBoardDisplay(this.gameData.game().getBoard(), this.username.equals(this.gameData.whiteUsername()));
     }
 
@@ -195,6 +210,9 @@ public class ChessClient {
             throw new ResponseException(400, "Invalid Game ID");
         }
         this.observing = true;
+
+        this.websocketFacade = new WebsocketFacade(this.serverUrl, this.notificationHandler);
+        this.websocketFacade.joinGame(this.authToken, this.gameData.gameID());
 
         return ChessGame.getBoardDisplay(this.gameData.game().getBoard(), true);
     }
