@@ -1,5 +1,12 @@
 package client;
 
+import model.GameData;
+import ui.ChessGame;
+import websocket.messages.Error;
+import websocket.messages.LoadGame;
+import websocket.messages.Notification;
+import websocket.messages.ServerMessage;
+
 import static ui.EscapeSequences.*;
 
 import java.util.Scanner;
@@ -49,4 +56,21 @@ public class Repl {
         }
         System.out.print("\n" + RESET_BG_COLOR + RESET_TEXT_COLOR + "[" + bracketText + "] " + ">>> " + SET_TEXT_COLOR_GREEN);
     }
+
+    public void notify(ServerMessage message) {
+        System.out.print("\n" + RESET_BG_COLOR);
+        if (message instanceof Notification) {
+            System.out.println(SET_TEXT_COLOR_WHITE + ((Notification) message).getMessage());
+        } else if (message instanceof Error) {
+            System.out.println(SET_TEXT_COLOR_RED + ((Error) message).getErrorMessage());
+        } else if (message instanceof LoadGame) {
+            GameData gameData = ((LoadGame) message).getGameData();
+            // Observers should view it from the white perspective
+            System.out.println(ChessGame.getBoardDisplay(gameData.game().getBoard(), !this.client.username.equals(gameData.blackUsername())));
+        } else {
+            System.out.println(SET_TEXT_COLOR_RED + "Unknown message received");
+        }
+        printPrompt();
+    }
+
 }

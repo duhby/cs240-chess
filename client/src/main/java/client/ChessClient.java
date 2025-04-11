@@ -15,6 +15,7 @@ public class ChessClient {
     private String authToken = null;
     public GameData gameData = null;
     public String username = null;
+    public boolean observing = false;
     private final HashMap<Integer, Integer> gameIDs = new HashMap<>();
 
     public ChessClient(String serverUrl) {
@@ -33,7 +34,7 @@ public class ChessClient {
                     case "quit" -> "quit";
                     default -> this.help();
                 };
-            } else {
+            } else if (this.gameData == null) {
                 return switch (cmd) {
                     case "logout" -> this.logout();
                     case "create" -> this.createGame(params);
@@ -43,10 +44,40 @@ public class ChessClient {
                     case "quit" -> "quit";
                     default -> this.help();
                 };
+            } else if (this.observing) {
+                return switch (cmd) {
+                    case "redraw" -> this.redraw();
+                    case "leave" -> this.leaveObserving();
+                    default -> this.help();
+                };
+            } else {
+                // game mode
+                String response = switch (cmd) {
+                    case "redraw" -> this.redraw();
+                    case "leave" -> this.leaveGame();
+                    case "resign" -> this.resign();
+                    default -> null;
+                };
+                if (response != null) {
+                    return response;
+                }
+                return switch (cmd.length()) {
+                    case 2 -> this.legalMoves(cmd);
+                    case 4 -> this.makeMove(cmd);
+                    default -> this.help();
+                };
             }
         } catch (ResponseException ex) {
             return ex.getMessage();
         }
+    }
+
+    public String leaveObserving() {
+        this.observing = false;
+    }
+
+    public String redraw() {
+
     }
 
     public String register(String... params) throws ResponseException {
@@ -163,6 +194,7 @@ public class ChessClient {
         if (this.gameData == null) {
             throw new ResponseException(400, "Invalid Game ID");
         }
+        this.observing = true;
 
         return ChessGame.getBoardDisplay(this.gameData.game().getBoard(), true);
     }
@@ -194,16 +226,32 @@ public class ChessClient {
                     - quit
                     - help
                     """;
+        } else if (this.gameData == null) {
+            return """
+                    - create <name>
+                    - list
+                    - join <id> <white|black>
+                    - observe <id>
+                    - logout
+                    - quit
+                    - help
+                    """;
+        } else if (this.observing) {
+            return """
+                    - redraw
+                    - leave
+                    - help
+                    """;
+        } else {
+            return """
+                    - redraw
+                    - leave
+                    - resign
+                    - <move> (ex. e2e4)
+                    - <position> (ex. e2)
+                    - help
+                    """;
         }
-        return """
-                - create <name>
-                - list
-                - join <id> [white|black]
-                - observe <id>
-                - logout
-                - quit
-                - help
-                """;
     }
 
     public String state() {
