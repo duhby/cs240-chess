@@ -13,7 +13,7 @@ import java.util.Objects;
 public class ChessClient {
     private final ServerFacade server;
     private String authToken = null;
-    private GameData gameData = null;
+    public GameData gameData = null;
     public String username = null;
     private final HashMap<Integer, Integer> gameIDs = new HashMap<>();
 
@@ -207,6 +207,9 @@ public class ChessClient {
     }
 
     public String state() {
+        if (gameData != null) {
+            return "IN_GAME";
+        }
         if (this.authToken == null) {
             return "LOGGED_OUT";
         }

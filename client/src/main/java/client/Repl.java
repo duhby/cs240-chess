@@ -36,6 +36,17 @@ public class Repl {
         if (this.client.state().equals("LOGGED_IN")) {
             bracketText = "LOGGED_IN: " + this.client.username;
         }
+        if (this.client.state().equals("IN_GAME")) {
+            String teamColor;
+            if (this.client.gameData.whiteUsername().equals(this.client.username)) {
+                teamColor = "WHITE";
+            } else if (this.client.gameData.blackUsername().equals(this.client.username)) {
+                teamColor = "BLACK";
+            } else {
+                teamColor = "OBSERVING";
+            }
+            bracketText = "GAME: " + teamColor;
+        }
         System.out.print("\n" + RESET_BG_COLOR + RESET_TEXT_COLOR + "[" + bracketText + "] " + ">>> " + SET_TEXT_COLOR_GREEN);
     }
 }
