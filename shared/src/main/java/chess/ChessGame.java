@@ -41,7 +41,8 @@ public class ChessGame {
      */
     public enum TeamColor {
         WHITE,
-        BLACK
+        BLACK,
+        ENDED
     }
 
     /**
@@ -81,13 +82,13 @@ public class ChessGame {
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPiece piece = this.board.getPiece(move.getStartPosition());
         if (piece == null) {
-            throw new InvalidMoveException();
+            throw new InvalidMoveException("Invalid move");
         }
         if (piece.getTeamColor() != this.turn) {
-            throw new InvalidMoveException();
+            throw new InvalidMoveException("Out of turn");
         }
         if (!this.validMoves(move.getStartPosition()).contains(move)) {
-            throw new InvalidMoveException();
+            throw new InvalidMoveException("Invalid move");
         }
         this.board.makeMove(move);
         this.setTeamTurn(this.turn == TeamColor.BLACK ? TeamColor.WHITE : TeamColor.BLACK);

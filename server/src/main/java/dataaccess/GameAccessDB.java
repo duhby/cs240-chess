@@ -54,11 +54,7 @@ public class GameAccessDB implements GameAccess {
             try (var ps = conn.prepareStatement("UPDATE game SET game=? WHERE id=?")) {
                 ps.setString(1, new Gson().toJson(data.game()));
                 ps.setInt(2, data.gameID());
-                try (var rs = ps.executeQuery()) {
-                    if (!rs.next()) {
-                        throw ResponseException.badRequest();
-                    }
-                }
+                ps.executeUpdate();
             }
         } catch (SQLException e) {
             throw new ResponseException(500, e.getMessage());

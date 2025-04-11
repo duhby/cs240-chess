@@ -77,7 +77,11 @@ public class WebSocketHandler {
         try {
             gameAccess.removePlayer(game.gameID(), username);
         } catch (ResponseException e) {
-            sendError(session, e.getMessage());
+            // Observers need to be able to leave as well
+            if (e.statusCode() != 400) {
+                this.sendError(session, e.getMessage());
+                return;
+            }
         }
         connections.remove(username);
         Notification notification = new Notification(String.format("%s left the game", username));
@@ -85,11 +89,21 @@ public class WebSocketHandler {
     }
 
     private void resign(String username, GameData game, Session session) throws IOException {
-        game.game().setTeamTurn(null);
+        ChessGame.TeamColor turn = game.game().getTeamTurn();
+        if (turn == ChessGame.TeamColor.ENDED) {
+            this.sendError(session, "Inactive game");
+            return;
+        }
+        if (!username.equals(game.whiteUsername()) && !username.equals(game.blackUsername())) {
+            this.sendError(session, "Invalid command");
+            return;
+        }
+        game.game().setTeamTurn(ChessGame.TeamColor.ENDED);
         try {
             gameAccess.edit(game);
         } catch (ResponseException e) {
-            sendError(session, e.getMessage());
+            this.sendError(session, e.getMessage());
+            return;
         }
         Notification notification = new Notification(String.format("%s resigned", username));
         connections.broadcast(null, game.gameID(), notification);
@@ -114,6 +128,22 @@ public class WebSocketHandler {
     }
 
     private void makeMove(String username, GameData game, ChessMove move, Session session) throws IOException {
+        ChessGame.TeamColor turn = game.game().getTeamTurn();
+        if (turn == ChessGame.TeamColor.ENDED) {
+            this.sendError(session, "Inactive game");
+            return;
+        }
+        if (turn == ChessGame.TeamColor.WHITE) {
+            if (!username.equals(game.whiteUsername())) {
+                this.sendError(session, "Invalid move");
+                return;
+            }
+        } else if (turn == ChessGame.TeamColor.BLACK) {
+            if (!username.equals(game.blackUsername())) {
+                this.sendError(session, "Invalid move");
+                return;
+            }
+        }
         if (move == null) {
             this.sendError(session, "Missing chess move");
             return;
@@ -122,11 +152,13 @@ public class WebSocketHandler {
             game.game().makeMove(move);
         } catch (InvalidMoveException e) {
             this.sendError(session, e.getMessage());
+            return;
         }
         try {
             this.gameAccess.edit(game);
         } catch (ResponseException e) {
             this.sendError(session, e.getMessage());
+            return;
         }
         connections.broadcast(null, game.gameID(), new LoadGame(game));
 
@@ -134,15 +166,14 @@ public class WebSocketHandler {
         connections.broadcast(username, game.gameID(), moveNotification);
 
         // Check etc. notifications
-        ChessGame.TeamColor color = game.game().getBoard().getPiece(move.getStartPosition()).getTeamColor();
         ChessGame.TeamColor otherColor;
         String otherUsername;
-        if (color == ChessGame.TeamColor.BLACK) {
-            otherColor = ChessGame.TeamColor.WHITE;
-            otherUsername = game.whiteUsername();
-        } else {
+        if (game.whiteUsername().equals(username)) {
             otherColor = ChessGame.TeamColor.BLACK;
             otherUsername = game.blackUsername();
+        } else {
+            otherColor = ChessGame.TeamColor.WHITE;
+            otherUsername = game.whiteUsername();
         }
         String message = null;
         if (game.game().isInCheckmate(otherColor)) {
@@ -153,6 +184,15 @@ public class WebSocketHandler {
             message = "is in check";
         }
         if (message != null) {
+            // End game
+            game.game().setTeamTurn(ChessGame.TeamColor.ENDED);
+            try {
+                gameAccess.edit(game);
+            } catch (ResponseException e) {
+                sendError(session, e.getMessage());
+                return;
+            }
+
             Notification status = new Notification(String.format("%s %s", otherUsername, message));
             connections.broadcast(null, game.gameID(), status);
         }
