@@ -2,6 +2,8 @@ package client.websocket;
 
 import chess.ChessMove;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import exception.ResponseException;
 import model.AuthData;
@@ -36,19 +38,29 @@ public class WebsocketFacade extends Endpoint {
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
-                    try {
-                        Notification deserialized = new Gson().fromJson(message, Notification.class);
-                        notificationHandler.notify(deserialized);
-                    } catch (JsonSyntaxException e) {
-                        Error deserialized = new Gson().fromJson(message, Error.class);
-                        notificationHandler.notify(deserialized);
-                    } catch (Exception e) {
-                        LoadGame deserialized = new Gson().fromJson(message, LoadGame.class);
-                        notificationHandler.notify(deserialized);
+                    Gson gson = new Gson();
+
+                    JsonObject json = JsonParser.parseString(message).getAsJsonObject();
+                    String type = json.get("serverMessageType").getAsString();
+
+                    switch (type) {
+                        case "NOTIFICATION" -> {
+                            Notification deserialized = gson.fromJson(json, Notification.class);
+                            notificationHandler.notify(deserialized);
+                        }
+                        case "ERROR" -> {
+                            Error deserialized = gson.fromJson(json, Error.class);
+                            notificationHandler.notify(deserialized);
+                        }
+                        case "LOAD_GAME" -> {
+                            LoadGame deserialized = gson.fromJson(json, LoadGame.class);
+                            notificationHandler.notify(deserialized);
+                        }
+                        default -> throw new RuntimeException();
                     }
                 }
             });
-        } catch (DeploymentException | IOException | URISyntaxException ex) {
+        } catch (DeploymentException | IOException | URISyntaxException | RuntimeException ex) {
             throw new ResponseException(500, ex.getMessage());
         }
     }

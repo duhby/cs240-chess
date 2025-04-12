@@ -25,16 +25,20 @@ public class Repl implements NotificationHandler {
 
         Scanner scanner = new Scanner(System.in);
         var result = "";
+        printPrompt();
         while (!result.equals("quit")) {
-            printPrompt();
             String line = scanner.nextLine();
             try {
                 result = client.eval(line);
+                if (result.isEmpty()) {
+                    continue;
+                }
                 System.out.print(SET_TEXT_COLOR_BLUE + result);
             } catch (Throwable e) {
                 var msg = e.toString();
                 System.out.print(msg);
             }
+            printPrompt();
         }
         System.out.println();
     }
@@ -59,7 +63,7 @@ public class Repl implements NotificationHandler {
     }
 
     public void notify(ServerMessage message) {
-        System.out.print("\n" + RESET_BG_COLOR);
+        System.out.print(RESET_BG_COLOR);
         switch (message) {
             case Notification notification -> System.out.println(SET_TEXT_COLOR_WHITE + notification.getMessage());
             case Error error -> System.out.println(SET_TEXT_COLOR_RED + error.getErrorMessage());
@@ -67,9 +71,10 @@ public class Repl implements NotificationHandler {
                 GameData gameData = loadGame.getGameData();
                 this.client.gameData = gameData;
                 // Observers should view it from the white perspective
-                System.out.println(ChessGame.getBoardDisplay(gameData.game().getBoard(), !this.client.username.equals(gameData.blackUsername())));
+                System.out.println();
+                System.out.print(ChessGame.getBoardDisplay(gameData.game().getBoard(), !this.client.username.equals(gameData.blackUsername()), null, null));
             }
-            case null, default -> System.out.println(SET_TEXT_COLOR_RED + "Unknown message received");
+            default -> System.out.println(SET_TEXT_COLOR_RED + "Unknown message received");
         }
         printPrompt();
     }

@@ -1,5 +1,8 @@
 package client;
 
+import chess.ChessMove;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import client.websocket.NotificationHandler;
 import client.websocket.WebsocketFacade;
 import exception.ResponseException;
@@ -8,9 +11,7 @@ import server.ServerFacade;
 import record.*;
 import ui.ChessGame;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.*;
 
 public class ChessClient {
     private final ServerFacade server;
@@ -71,6 +72,7 @@ public class ChessClient {
                 return switch (cmd.length()) {
                     case 2 -> this.legalMoves(cmd);
                     case 4 -> this.makeMove(cmd);
+                    case 6 -> this.makeMovePromotion(cmd);
                     default -> this.help();
                 };
             }
@@ -79,17 +81,78 @@ public class ChessClient {
         }
     }
 
-    public String leaveObserving() {
-        this.observing = false;
-        this.gameData = null;
+    public String resign() throws ResponseException {
+        this.websocketFacade.resign(this.authToken, this.gameData.gameID());
+        return "";
     }
 
-    public String leaveGame() {
+    public String makeMove(String s) throws ResponseException {
+        ChessMove move;
+        try {
+            move = new ChessMove(ChessPosition.fromString(s.substring(0, 2)), ChessPosition.fromString(s.substring(2, 4)), null);
+        } catch (RuntimeException e) {
+            return this.help();
+        }
+        this.websocketFacade.makeMove(this.authToken, this.gameData.gameID(), move);
+        return "";
+    }
+
+    public String makeMovePromotion(String s) throws ResponseException {
+        ChessMove move;
+        try {
+            if (s.charAt(4) != '=') {
+                return this.help();
+            }
+            ChessPiece.PieceType promotionPiece = switch (s.charAt(5)) {
+                case 'q' -> ChessPiece.PieceType.QUEEN;
+                case 'b' -> ChessPiece.PieceType.BISHOP;
+                case 'n' -> ChessPiece.PieceType.KNIGHT;
+                case 'r' -> ChessPiece.PieceType.ROOK;
+                default -> throw new RuntimeException("Invalid promotion piece: " + s.charAt(5));
+            };
+            move = new ChessMove(ChessPosition.fromString(s.substring(0, 2)), ChessPosition.fromString(s.substring(2, 4)), promotionPiece);
+        } catch (RuntimeException e) {
+            return this.help();
+        }
+        this.websocketFacade.makeMove(this.authToken, this.gameData.gameID(), move);
+        return "";
+    }
+
+    public String legalMoves(String s) {
+        ChessPosition position;
+        try {
+            position = ChessPosition.fromString(s);
+        } catch (RuntimeException e) {
+            return this.help();
+        }
+        ChessPiece piece = this.gameData.game().getBoard().getPiece(position);
+        if (piece == null) {
+            return "Empty square";
+        }
+        Collection<ChessMove> validMoves = this.gameData.game().validMoves(position);
+        Collection<ChessPosition> validSquares = new ArrayList<>();
+        for (ChessMove move : validMoves) {
+            validSquares.add(move.getEndPosition());
+        }
+        return ChessGame.getBoardDisplay(gameData.game().getBoard(), !this.username.equals(gameData.blackUsername()), validSquares, position);
+    }
+
+    public String leaveObserving() throws ResponseException {
+        this.websocketFacade.leaveGame(this.authToken, this.gameData.gameID());
         this.gameData = null;
+        this.observing = false;
+        return "You stopped observing the game.";
+    }
+
+    public String leaveGame() throws ResponseException {
+        this.websocketFacade.leaveGame(this.authToken, this.gameData.gameID());
+        this.gameData = null;
+        return "You left the game.";
     }
 
     public String redraw() {
-
+        // Observing will be white
+        return ChessGame.getBoardDisplay(gameData.game().getBoard(), !this.username.equals(gameData.blackUsername()), null, null);
     }
 
     public String register(String... params) throws ResponseException {
@@ -184,7 +247,7 @@ public class ChessClient {
         this.websocketFacade = new WebsocketFacade(this.serverUrl, this.notificationHandler);
         this.websocketFacade.joinGame(this.authToken, this.gameData.gameID());
 
-        return ChessGame.getBoardDisplay(this.gameData.game().getBoard(), this.username.equals(this.gameData.whiteUsername()));
+        return "";
     }
 
     public String spectate(String... params) throws ResponseException {
@@ -214,7 +277,7 @@ public class ChessClient {
         this.websocketFacade = new WebsocketFacade(this.serverUrl, this.notificationHandler);
         this.websocketFacade.joinGame(this.authToken, this.gameData.gameID());
 
-        return ChessGame.getBoardDisplay(this.gameData.game().getBoard(), true);
+        return "";
     }
 
     public String listGames() throws ResponseException {
@@ -265,7 +328,7 @@ public class ChessClient {
                     - redraw
                     - leave
                     - resign
-                    - <move> (ex. e2e4)
+                    - <move> (ex. e2e4, e7e8=Q)
                     - <position> (ex. e2)
                     - help
                     """;

@@ -42,6 +42,14 @@ public class ChessPosition {
         return String.format("%c%d", col, this.getRow());
     }
 
+    public static ChessPosition fromString(String s) {
+        char file = s.charAt(0);
+        char rank = s.charAt(1);
+        int col = file - 'a' + 1;
+        int row = Character.getNumericValue(rank);
+        return new ChessPosition(row, col);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
