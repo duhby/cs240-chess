@@ -72,7 +72,14 @@ public class Repl implements NotificationHandler {
                 this.client.gameData = gameData;
                 // Observers should view it from the white perspective
                 System.out.println();
-                System.out.print(ChessGame.getBoardDisplay(gameData.game().getBoard(), !this.client.username.equals(gameData.blackUsername()), null, null));
+                System.out.print(
+                        ChessGame.getBoardDisplay(
+                                gameData.game().getBoard(),
+                                !this.client.username.equals(gameData.blackUsername()),
+                                null,
+                                null
+                        )
+                );
             }
             default -> System.out.println(SET_TEXT_COLOR_RED + "Unknown message received");
         }

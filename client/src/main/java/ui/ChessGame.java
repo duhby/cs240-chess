@@ -5,11 +5,20 @@ import chess.ChessPiece;
 import chess.ChessPosition;
 import chess.ChessGame.TeamColor;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 public class ChessGame {
-    public static String getBoardDisplay(ChessBoard board, boolean isWhite, Collection<ChessPosition> highlightedSquares, ChessPosition selectedSquare) {
+    public static String getBoardDisplay(
+            ChessBoard board,
+            boolean isWhite,
+            Collection<ChessPosition> highlightedSquares,
+            ChessPosition selectedSquare)
+    {
         StringBuilder display = new StringBuilder();
+        if (highlightedSquares == null) {
+            highlightedSquares = new ArrayList<>();
+        }
 
         int startRow = isWhite ? 8 : 1;
         int endRow = isWhite ? 0 : 9;
@@ -35,14 +44,12 @@ public class ChessGame {
                 if (selectedSquare != null && selectedSquare.getColumn() == col && selectedSquare.getRow() == row) {
                     bgColor = EscapeSequences.SET_BG_COLOR_YELLOW;
                 }
-                if (highlightedSquares != null) {
-                    for (ChessPosition position : highlightedSquares) {
-                        if (position.getColumn() == col && position.getRow() == row) {
-                            bgColor = isLightSquare ?
-                                    EscapeSequences.SET_BG_COLOR_GREEN :
-                                    EscapeSequences.SET_BG_COLOR_DARK_GREEN;
-                            break;
-                        }
+                for (ChessPosition position : highlightedSquares) {
+                    if (position.getColumn() == col && position.getRow() == row) {
+                        bgColor = isLightSquare ?
+                                EscapeSequences.SET_BG_COLOR_GREEN :
+                                EscapeSequences.SET_BG_COLOR_DARK_GREEN;
+                        break;
                     }
                 }
 
